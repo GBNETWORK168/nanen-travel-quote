@@ -664,16 +664,16 @@
         });
       }
       h += selectField('產險保額（萬）新快樂旅平卡', b + '_propSel', ZERO.concat(cardOpts), {
-        hint: hasProp ? ((curCard ? curCard.plan + ' 組合' + curCard.combo + '（住院' + curCard.hospitalWan + '萬）；' : '') + (Q.schengen ? '申根→計劃三（醫療加值／申根適用）' : '計劃二＝國外旅遊；1500 萬僅計劃三')) : '產險不投保（保費 0，不列不便險／產險保障）',
+        hint: hasProp ? ((curCard ? curCard.plan + ' 組合' + curCard.combo + '（住院' + curCard.hospitalWan + '萬）；' : '') + (Q.schengen ? '申根→計劃三（醫療加值／申根適用）' : '計劃二＝國外旅遊；1500 萬僅計劃三')) : '產險不投保（保費 0，不列產險保障）',
         auto: true
       });
     } else if (child) {
       h += selectField('產險方案', b + '_propSel', ZERO.concat([{ value: 1, label: Q.schengen || plan.property.planCode === 'P2-CHILD' ? '計畫二 兒童醫療加值（P2-CHILD）' : '計畫一 兒童國外（P1-CHILD）' }]), {
-        hint: hasProp ? '未滿15足歲只能投保兒童方案；DM：無意外死亡之喪葬費用保險金（身故及失能「-」）' : '產險不投保（保費 0，不列不便險／產險保障）', auto: true
+        hint: hasProp ? '未滿15足歲只能投保兒童方案；DM：無意外死亡之喪葬費用保險金（身故及失能「-」）' : '產險不投保（保費 0，不列產險保障）', auto: true
       });
     } else {
       h += selectField('產險保額（萬）', b + '_propSel', ZERO.concat(withCurrent(propertyDeathOptionsFor(ai), hasProp ? plan.property.deathWan : null, '不符 DM 投保年齡')), {
-        hint: hasProp ? (Q.schengen ? '計畫二 P2-G*（突發疾病住院 150萬）' : '計畫一 P1-G*') : '產險不投保（保費 0，不列不便險／產險保障）',
+        hint: hasProp ? (Q.schengen ? '計畫二 P2-G*（突發疾病住院 150萬）' : '計畫一 P1-G*') : '產險不投保（保費 0，不列產險保障）',
         auto: true
       });
     }
@@ -712,7 +712,7 @@
       field('急診（元）', b + 'property.erYuan', { hint: '空白＝自動', auto: true }) +
       field('意外醫療（萬）', b + 'property.accidentMedicalWan') +
       '</div>';
-    h += listEditor(i, 'inconvenience', '不便險項目');
+    if (plan.property.enabled !== false) h += listEditor(i, 'inconvenience', '不便險項目');
     h += listEditor(i, 'others', '其他產險保障');
     h += '</div></details>';
 
@@ -1011,7 +1011,7 @@
       if ((p.property.enabled === false && /不便險/.test(tg)) || ((p.property.enabled === false || !(p.life && p.life.enabled)) && /雙實支/.test(tg))) {
         add('warn', n + '：副標「' + tg + '」與不投保的險種不符，請到「進階」修改副標。');
       }
-      if (p.property.enabled === false) { add('ok', n + '：產險不投保（不列不便險／產險保障）。'); return; }
+      if (p.property.enabled === false) { add('ok', n + '：產險不投保（不列產險保障）。'); return; }
       if (!TQ.isSet(p.property.premium)) add('err', n + '：產險保費未填（' + (p.property._premTip || '') + '）。');
       else if (!p.property._premAuto) add('warn', n + '：產險保費非自動帶入（' + (p.property._premTip || '手填') + '）。');
       else add('ok', n + '：產險保費已自動帶入（' + (p.property._premSrc || 'DM') + '）。');

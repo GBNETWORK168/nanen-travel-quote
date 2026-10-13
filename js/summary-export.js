@@ -27,7 +27,7 @@
       h += '<div class="sum-card-h"><span class="sum-name">' + TQ.esc(plan.name || ('方案' + (idx + 1))) + '</span>';
       if (plan.recommended) h += '<span class="sum-badge">推薦</span>';
       h += '</div>';
-      h += '<div class="sum-tag">' + TQ.esc(plan.tagline || '') + '</div>';
+      h += '<div class="sum-tag">' + TQ.esc(TQ.displayTagline(plan)) + '</div>';
       if (c.child) {
         h += '<div class="sum-death"><div class="lab">' + (on ? '人壽兒童主約 MRC' : '意外身故・失能') + '</div><div class="val">' + (on ? TQ.esc(TQ.fmtYuan(L.mrc)) : '—') + '</div>';
         h += '<div class="br">' + TQ.esc(on ? '兒童傷害醫療旅平險（未滿15足歲無 AT1）' : '未滿15足歲：產險兒童方案無身故・失能') + '</div></div>';

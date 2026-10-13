@@ -403,7 +403,7 @@
     if (quote.sample) h += '<div class="card-sample">範例</div>';
     h += '<header class="plan-head"><div class="plan-title"><span class="plan-no">' + esc(plan.name || ('方案' + (idx + 1))) + '</span>' +
       (plan.recommended ? '<span class="reco-badge">推薦</span>' : '') + '</div>' +
-      '<div class="plan-tagline">' + esc(plan.tagline || '') + '</div></header>';
+      '<div class="plan-tagline">' + esc(displayTagline(plan)) + '</div></header>';
 
     if (c.child) {
       // 未滿15足歲：人壽無 AT1、產險兒童方案無身故失能 → 主框改顯示兒童主約
@@ -462,6 +462,13 @@
     });
   }
   function schengenBadge(quote) { return isCardQuote(quote) ? '申根／計劃三' : '申根／計畫二'; }
+  /** 產險不投保 → 副標去掉「不便險」字樣（資料保留，重新投保即恢復） */
+  function displayTagline(plan) {
+    var t = String((plan && plan.tagline) || '');
+    if (!(plan && plan.property && plan.property.enabled === false)) return t;
+    t = t.replace(/\s*[＋+、,，／\/&＆]\s*不便險(?:[（(][^）)]*[）)])?/g, '').replace(/不便險(?:[（(][^）)]*[）)])?\s*[＋+、,，／\/&＆]\s*/g, '').replace(/不便險/g, '').trim();
+    return t;
+  }
   function renderNotes(quote) {
     var notes = [];
     var anyLife = (quote.plans || []).some(function (p) { return p.life && p.life.enabled; });
@@ -893,7 +900,7 @@
     detectDomestic: detectDomestic, DOMESTIC_WARNING: DOMESTIC_WARNING,
     AGE_BANDS: AGE_BANDS, ageInfo: ageInfo, isChildQuote: isChildQuote, childOh1Wan: childOh1Wan,
     CHILD_MRC_WAN: CHILD_MRC_WAN, CHILD_OH1_OPTIONS: CHILD_OH1_OPTIONS, propertyAgeCheck: propertyAgeCheck,
-    isCardQuote: isCardQuote, schengenBadge: schengenBadge, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
+    isCardQuote: isCardQuote, displayTagline: displayTagline, schengenBadge: schengenBadge, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
     cardAddonQuote: cardAddonQuote, CARD_SOURCE: CARD_SOURCE,
     BRAND: BRAND, renderBrand: renderBrand, brandLogoReady: function () { return brandLogoReady; },
     renderQuote: renderQuote, renderPlanCard: renderPlanCard, premiumParts: premiumParts, covSource: covSource, planNothingInsured: planNothingInsured, titleFor: titleFor, esc: esc
