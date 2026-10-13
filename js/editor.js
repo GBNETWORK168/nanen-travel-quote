@@ -130,11 +130,15 @@
     if (ai0.valid) q.ageBand = ai0.band;
     if (!q.ageBand) q.ageBand = '18-65';
     if (typeof q.schengen !== 'boolean') q.schengen = false;
+    if (q.propertyProduct !== 'card') q.propertyProduct = 'combo';
+    if (!q.cardAddons || typeof q.cardAddons !== 'object') q.cardAddons = { activity: false, carRental: false };
     if (!q.lifeRegion) {
       q.lifeRegion = q.schengen ? 'other' : (domesticDest ? 'asia14' : ((window.LIFE_RATES && LIFE_RATES.guessLifeRegion(q.destination)) || 'asia14'));
     }
     // 方案一／二預設含人壽；方案三不含
     q.plans.forEach(function (p, idx) {
+      // 旅平卡專案預設檔次：方案一較高、方案三最便宜（皆為涵蓋年齡之組合）
+      if (p.property && p.property.cardTier == null) p.property.cardTier = [2, 1, 0][idx] || 0;
       if (p.life && typeof p.life.enabled !== 'boolean') p.life.enabled = idx < 2;
       if (p.life && TQ.CHILD_OH1_OPTIONS.indexOf(Number(p.life.childOh1Wan)) < 0) p.life.childOh1Wan = 60;
       if (q.schengen && p.life && p.life.enabled) p.life.oaa = false;
@@ -290,7 +294,14 @@
       var pre = TQ.resolvePropertyPreset(p.property, Q);
       var ac = TQ.propertyAgeCheck(pre, Q);
       if (!ac.ok) out.push('⚠ ' + n + '：產險' + ac.tip);
+      if (TQ.isCardQuote(Q) && !pre) out.push('⚠ ' + n + '：新快樂旅平卡專案無涵蓋此年齡之組合');
     });
+    if (TQ.isCardQuote(Q)) {
+      var adq = TQ.cardAddonQuote(Q, Q.days);
+      if (adq.blockedTip) out.push('⚠ ' + adq.blockedTip);
+      var dd = TQ.num(Q.days);
+      if (dd && (dd < 2 || dd > 30)) out.push('⚠ 新快樂旅平卡專案費率表僅 2～30 天，目前 ' + dd + ' 天無費率（禁止推估），請洽產險試算或取消勾選旅平卡專案');
+    }
     return out;
   }
   /** 年齡欄提示（紅字＝必填／無效；橘字＝80歲以上無產險方案；藍字＝年齡帶與上限） */
@@ -310,7 +321,8 @@
       }
       if (!ai.child && ai.age >= 66) {
         note += '（66歲以上人壽保費同 18～65，僅 AT1 上限不同）';
-        if (ai.age >= 80) { soft = true; msg = '⚠ ' + ai.label + '：產險新快樂旅綜+ 投保年齡最高 79 歲，無可投保方案'; }
+        if (ai.age >= 80 && TQ.isCardQuote(Q)) { if (ai.age > 85) { soft = true; msg = '⚠ ' + ai.label + '：新快樂旅平卡專案投保年齡最高 85 歲（組合8／13），無可投保組合'; } }
+        else if (ai.age >= 80) { soft = true; msg = '⚠ ' + ai.label + '：產險新快樂旅綜+ 投保年齡最高 79 歲，無可投保方案'; }
       } else if (ai.band === '15-17') {
         note += '（15～17歲費率同 18～65；產險 1000萬以上、租車限 18 歲以上）';
       }
@@ -372,6 +384,8 @@
 
   function applySchengenMode(on) {
     Q.schengen = !!on;
+    // 旅平卡：申根改變 → 回到預設組合（計劃二／三）
+    Q.plans.forEach(function (p) { if (p.property) { p.property.cardCombo = ''; p.property._appliedCode = null; } });
     if (on) {
       Q.lifeRegion = 'other';
       // 申根／歐洲：依目的地套 DM 註3（歐洲＝200%；若判不到則預設 200%）
@@ -618,7 +632,7 @@
     h += '<p class="plan-simple-hint">' + (hasLife && hasProp
       ? '此方案只需選：人壽保額、產險保額（其餘自動）；選「0（不投保）」＝該險種不投保'
       : (hasLife ? '此方案：只投保人壽（產險不投保）' : (hasProp ? '此方案：只投保產險（人壽不投保）' : '⚠ 人壽與產險都不投保：至少要投保一項'))) +
-      (Q.schengen ? '　｜已勾選申根→產險用計畫二（突發疾病 150萬）' : '') + '</p>';
+      (TQ.isCardQuote(Q) ? '　｜新快樂旅平卡專案' + (Q.schengen ? '（申根→預設計劃三）' : '') : (Q.schengen ? '　｜已勾選申根→產險用計畫二（突發疾病 150萬）' : '')) + '</p>';
 
     h += '<div class="grid g2">';
     var ZERO = [{ value: 0, label: '0（不投保）' }];
@@ -634,7 +648,17 @@
           : '人壽不投保（保費 0，卡片不列人壽保障）', auto: true
       });
     }
-    if (child) {
+    if (TQ.isCardQuote(Q)) {
+      var curCard = TQ.resolvePropertyPreset(plan.property, Q);
+      var cardOpts = TQ.cardPresets().map(function (cp) {
+        var ok = !ai.valid || (ai.age >= cp.ageMin && ai.age <= cp.ageMax);
+        return { value: cp.combo, label: cp.plan + ' 組合' + cp.combo + '（' + cp.ageLabel + (cp.deathWan ? '・身故' + cp.deathWan + '萬' : '・兒童') + '・住院' + cp.hospitalWan + '萬）' + (ok ? '' : '｜年齡不符') };
+      });
+      h += selectField('產險 新快樂旅平卡組合', b + '_propSel', ZERO.concat(cardOpts), {
+        hint: hasProp ? ((curCard ? curCard.planName + '；' : '') + '計劃二＝國外旅遊、計劃三＝醫療加值／申根；組合愈大保障愈高') : '產險不投保（保費 0，不列不便險／產險保障）',
+        auto: true
+      });
+    } else if (child) {
       h += selectField('產險方案', b + '_propSel', ZERO.concat([{ value: 1, label: Q.schengen || plan.property.planCode === 'P2-CHILD' ? '計畫二 兒童醫療加值（P2-CHILD）' : '計畫一 兒童國外（P1-CHILD）' }]), {
         hint: hasProp ? '未滿15足歲只能投保兒童方案；DM：無意外死亡之喪葬費用保險金（身故及失能「-」）' : '產險不投保（保費 0，不列不便險／產險保障）', auto: true
       });
@@ -669,7 +693,7 @@
       '</div></div>';
 
     h += '<div class="sub-box" style="margin-top:10px"><b>產險細項</b>';
-    h += '<div class="preset-row" style="margin-top:8px"><label>改選完整方案<select data-preset="' + i + '">' +
+    if (!TQ.isCardQuote(Q)) h += '<div class="preset-row" style="margin-top:8px"><label>改選完整方案<select data-preset="' + i + '">' +
       presetOptions(plan.property.planCode) + '</select></label></div>';
     h += '<div class="grid g3">' +
       field('方案代碼', b + 'property.planCode', { type: 'text' }) +
@@ -704,6 +728,7 @@
       var k = el.getAttribute('data-k'), v;
       var mSelF = /^plans\.(\d+)\._(life|prop)Sel$/.exec(k);
       if (k === 'extraNotesText') v = (Q.extraNotes || []).join('\n');
+      else if (k === 'propertyProductCard') v = Q.propertyProduct === 'card';
       else if (mSelF) v = selValue(Q.plans[Number(mSelF[1])], mSelF[2]);
       else v = getPath(Q, k);
       if (el.type === 'checkbox') el.checked = !!v;
@@ -714,6 +739,11 @@
   function selValue(plan, side) {
     var child = TQ.isChildQuote(Q);
     if (side === 'life') return plan.life && plan.life.enabled ? (child ? TQ.childOh1Wan(plan.life) : plan.life.at1Wan) : 0;
+    if (TQ.isCardQuote(Q)) {
+      if (plan.property.enabled === false) return 0;
+      var cp = TQ.resolvePropertyPreset(plan.property, Q);
+      return cp ? cp.combo : 0;
+    }
     return plan.property.enabled === false ? 0 : (child ? 1 : plan.property.deathWan);
   }
   /** 選單改值：0＝不投保；其他＝投保並設定保額 */
@@ -729,6 +759,12 @@
       }
       p.life.premium = v > 0 ? null : 0;
       delete skipAutoOnce.life[i];
+    } else if (TQ.isCardQuote(Q)) {
+      p.property.enabled = v > 0;
+      if (v > 0) p.property.cardCombo = String(v);
+      p.property._appliedCode = null;
+      if (!(v > 0)) p.property.premium = 0;
+      delete skipAutoOnce.prop[i];
     } else {
       p.property.enabled = v > 0;
       if (v > 0 && !child) { p.property.deathWan = v; p.property.planCode = ''; }
@@ -737,10 +773,30 @@
       delete skipAutoOnce.prop[i];
     }
   }
+  /** 新快樂旅平卡專案開關：切換時保存／還原原「新快樂旅綜+」保額，清掉 planCode 讓保障重套 */
+  function setCardMode(on) {
+    if ((Q.propertyProduct === 'card') === !!on) { syncCardUI(); return; } // input＋change 雙觸發：只在狀態切換時處理
+    Q.propertyProduct = on ? 'card' : 'combo';
+    if (!Q.cardAddons) Q.cardAddons = { activity: false, carRental: false };
+    Q.plans.forEach(function (p) {
+      var pr = p.property;
+      if (on) { pr._comboDeath = pr.deathWan; }
+      else if (pr._comboDeath != null) { pr.deathWan = pr._comboDeath; }
+      pr.planCode = ''; pr._appliedCode = null;
+      if (pr.enabled !== false) pr.premium = null;
+    });
+    skipAutoOnce.life = {}; skipAutoOnce.prop = {};
+    syncCardUI();
+  }
+  function syncCardUI() {
+    var box = document.getElementById('cardAddonBox');
+    if (box) box.hidden = Q.propertyProduct !== 'card';
+  }
   function readInput(el) {
     var k = el.getAttribute('data-k');
     var mSel = /^plans\.(\d+)\._(life|prop)Sel$/.exec(k);
     if (mSel) { applySel(Number(mSel[1]), mSel[2], el.value); return; }
+    if (k === 'propertyProductCard') { setCardMode(el.checked); return; }
     if (k === 'extraNotesText') { Q.extraNotes = el.value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean); return; }
     var v;
     if (el.type === 'checkbox') v = el.checked;
@@ -840,6 +896,7 @@
   }
 
   function refreshDerived() {
+    syncCardUI();
     // 起迄日 → 天數（算頭算尾）；必須在保費查表前更新
     var dsNow = syncDaysFromDates();
     updateDaysDisplay(dsNow);
@@ -1029,6 +1086,7 @@
       readInput(t);
       var kc = t.getAttribute('data-k');
       if (kc === 'schengen') { buildPlanUI(); return; }
+      if (kc === 'propertyProductCard' || /^cardAddons\./.test(kc)) { skipAutoOnce.prop = {}; buildPlanUI(); update(); return; }
       if (/^plans\.\d+\.(_lifeSel|_propSel|life\.enabled)$/.test(kc)) { buildPlanUI(); update(); return; }
       update();
     }

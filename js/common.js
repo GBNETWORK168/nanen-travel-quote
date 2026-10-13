@@ -22,7 +22,8 @@
   });
   function renderBrand(prefix) {
     prefix = prefix || 'brand';
-    return '<div class="' + prefix + '-bar"><img class="' + prefix + '-logo" src="' + BRAND.logo + '" alt="' + BRAND.logoAlt + '" width="40" height="57">' +
+    return '<img class="' + prefix + '-logo" src="' + BRAND.logo + '" alt="' + BRAND.logoAlt + '" width="160" height="160">' +
+      '<div class="' + prefix + '-bar">' +
       '<div class="' + prefix + '-text"><div class="' + prefix + '-slogan">' + BRAND.slogan + '</div>' +
       '<div class="' + prefix + '-title">' + BRAND.title + '</div></div></div>';
   }
@@ -439,22 +440,48 @@
     return h;
   }
 
+  function cardPropNote(quote) {
+    var parts = [];
+    (quote.plans || []).forEach(function (p, i) {
+      if (p.property && p.property.enabled === false) return;
+      var pre = resolveCardPreset(p.property || {}, quote);
+      if (!pre) return;
+      parts.push({ name: p.name || ('方案' + (i + 1)), txt: '富邦產險 新快樂旅平卡（專案）' + pre.plan + ' 組合' + pre.combo });
+    });
+    var uniq = parts.map(function (x) { return x.txt; }).filter(function (t, i, a) { return a.indexOf(t) === i; });
+    if (uniq.length <= 1) return '產險＝' + (uniq[0] || '富邦產險 新快樂旅平卡（專案）');
+    return '產險＝' + parts.map(function (x) { return x.txt + '（' + x.name + '）'; }).join('、');
+  }
+  function cardAddonNoteItems(quote) {
+    var ad = cardAddonQuote(quote, quote.days);
+    return ad.items.map(function (x) {
+      return x.name + ' ' + comma(x.premium) + ' 元（' + (x.coverage || []).map(function (c) { return c.name + ' ' + c.amount; }).join('、') + '）';
+    });
+  }
   function renderNotes(quote) {
     var notes = [];
     var anyLife = (quote.plans || []).some(function (p) { return p.life && p.life.enabled; });
     var anyProp = (quote.plans || []).some(function (p) { return !(p.property && p.property.enabled === false); });
-    var propNote = '產險＝' + PROPERTY_PRODUCT + (quote.schengen ? '【計畫二・醫療加值／申根適用，海外突發疾病住院 150萬】' : '【計畫一・國外旅遊適用】');
+    var cardQ = isCardQuote(quote);
+    var propNote = cardQ ? cardPropNote(quote) : '產險＝' + PROPERTY_PRODUCT + (quote.schengen ? '【計畫二・醫療加值／申根適用，海外突發疾病住院 150萬】' : '【計畫一・國外旅遊適用】');
     notes.push((anyLife ? '人壽＝' + LIFE_PRODUCT + (anyProp ? '；' : '') : '') + (anyProp ? propNote : '') + '。');
     if (anyLife !== anyProp || (quote.plans || []).some(function (p) { return !(p.life && p.life.enabled) || (p.property && p.property.enabled === false); })) {
       notes.push('保費列中「不投保」表示該方案未投保該險種（不含其保障與保費）。');
     }
-    if (quote.schengen) {
+    if (cardQ && anyProp) {
+      notes.push('產險保費來源：' + CARD_SOURCE + '；保障內容依富邦產險新快樂旅平卡 DM（115.04）國外商品組合。');
+      var adn = cardAddonNoteItems(quote);
+      if (adn.length) notes.push('產險加價購（已含於產險保費）：' + adn.join('；') + '。');
+    }
+    if (quote.schengen && cardQ) {
+      notes.push('申根行程：請隨身攜帶申根地區醫療旅遊保險英文投保憑證（出發前 7 個工作日投保）。人壽為國外其他地區（OAA 不適用），保費請以 GPTA 試算為準。');
+    } else if (quote.schengen) {
       notes.push('申根行程：產險已套用計畫二；請隨身攜帶申根地區醫療旅遊保險英文投保憑證。人壽為國外其他地區（OAA 不適用），保費請以 GPTA 試算為準。');
     }
     var childQ = isChildQuote(quote);
     if (childQ) {
       if (anyLife) notes.push('未滿15足歲：人壽主約為富邦人壽兒童傷害醫療旅行平安保險 MRC 60萬（傷害醫療每一事故最高），不提供 AT1 意外身故；另含海外突發疾病 OH1 及 OAA。');
-      if (anyProp) notes.push('產險：未滿15足歲適用新快樂旅綜+ 兒童方案；依 DM「針對未滿15足歲之被保險人，本保險契約無提供意外死亡之喪葬費用保險金」。');
+      if (anyProp) notes.push(cardQ ? '產險：未滿15足歲適用新快樂旅平卡兒童組合（無身故及失能保障）。' : '產險：未滿15足歲適用新快樂旅綜+ 兒童方案；依 DM「針對未滿15足歲之被保險人，本保險契約無提供意外死亡之喪葬費用保險金」。');
     }
     if (anyLife) {
       var pct = num(quote.lifeRegionPct || 100);
@@ -512,6 +539,55 @@
   }
 
 
+  /* ---------- 新快樂旅平卡專案（quote.propertyProduct === 'card'） ---------- */
+  var CARD_SOURCE = '115年新快樂旅平卡專案費率表（含法定傳染病）';
+  function isCardQuote(q) { return !!(q && q.propertyProduct === 'card'); }
+  function cardPresets() { return (global.XKL_CARD_PRESETS && global.XKL_CARD_PRESETS.plans) || []; }
+  function cardPresetByCombo(combo) {
+    var list = cardPresets();
+    for (var i = 0; i < list.length; i++) if (String(list[i].combo) === String(combo)) return list[i];
+    return null;
+  }
+  /** 預設組合：計劃二（申根→計劃三）中涵蓋年齡者，依 tier 由便宜往上（tier 0＝最便宜） */
+  function cardDefaultCombo(quote, tier) {
+    var sch = !!(quote && quote.schengen);
+    var a = ageInfo(quote && quote.age);
+    var cands = cardPresets().filter(function (p) {
+      if (p.schengen !== sch) return false;
+      if (!a.valid) return !p.child;
+      return a.age >= p.ageMin && a.age <= p.ageMax;
+    });
+    if (!cands.length) return null;
+    cands.sort(function (x, y) { return num(x.premiumByDays['7']) - num(y.premiumByDays['7']); });
+    var t = Math.max(0, Math.min(num(tier) || 0, cands.length - 1));
+    return cands[t];
+  }
+  function resolveCardPreset(prop, quote) {
+    if (!prop) return null;
+    if (prop.cardCombo) return cardPresetByCombo(prop.cardCombo);
+    return cardDefaultCombo(quote, prop.cardTier);
+  }
+  /** 加價購（特定活動／海外租車）：依天數查表、檢查年齡；回傳 {items, total, blockedTip} */
+  function cardAddonQuote(quote, days) {
+    var defs = (global.XKL_CARD_PRESETS && global.XKL_CARD_PRESETS.addons) || {};
+    var sel = (quote && quote.cardAddons) || {};
+    var a = ageInfo(quote && quote.age), d = num(days);
+    var out = { items: [], total: 0, blockedTip: '' };
+    ['activity', 'carRental'].forEach(function (k) {
+      if (!sel[k] || !defs[k]) return;
+      var def = defs[k];
+      if (a.valid && (a.age < def.ageMin || a.age > def.ageMax)) {
+        out.blockedTip = out.blockedTip || ('加價購「' + def.shortLabel + '」投保年齡為 ' + def.ageLabel + '，' + a.age + ' 歲不可投保；請取消勾選');
+        return;
+      }
+      var pr = def.premiumByDays[String(d)];
+      if (pr === undefined) { out.blockedTip = out.blockedTip || ('加價購「' + def.shortLabel + '」' + d + ' 天無費率'); return; }
+      out.items.push({ key: k, name: def.shortLabel, label: def.label, premium: pr, coverage: def.coverage });
+      out.total += pr;
+    });
+    return out;
+  }
+
   /** 產險預設方案解析：保額優先對「計畫一・一般」(P1-G*)；進階方案（計畫二／租車／兒童）以 planCode 為準 */
   function findPropertyPreset(prop) {
     var list = (global.PROPERTY_PRESETS && global.PROPERTY_PRESETS.plans) || [];
@@ -531,6 +607,7 @@
     return null;
   }
   function resolvePropertyPreset(prop, quote) {
+    if (isCardQuote(quote)) return resolveCardPreset(prop, quote);
     var list = (global.PROPERTY_PRESETS && global.PROPERTY_PRESETS.plans) || [];
     if (!prop) return null;
     var schengen = !!(quote && quote.schengen);
@@ -572,7 +649,8 @@
     return { ok: false, tip: preset.label + ' 投保年齡為「' + preset.ageLabel + '」（DM），' + a.age + ' 歲不可投保' };
   }
   /** 產險保費來源（依天數）：2～10 天 DM 費率表；11～30 天展業平台試算（見 presets.js meta.premiumSources） */
-  function propertyPremiumSource(days) {
+  function propertyPremiumSource(days, quote) {
+    if (isCardQuote(quote)) return CARD_SOURCE;
     var meta = (global.PROPERTY_PRESETS && global.PROPERTY_PRESETS.meta) || {};
     var list = meta.premiumSources || [];
     var d = num(days);
@@ -588,6 +666,10 @@
   function lookupPropertyPremium(prop, days, quote) {
     var d = num(days);
     var preset = resolvePropertyPreset(prop, quote);
+    var card = isCardQuote(quote);
+    if (!preset && card) {
+      return { found: false, outOfRange: false, ageBlocked: true, tip: '新快樂旅平卡專案無涵蓋此年齡之組合（計劃二／三：未滿15、15～85歲）', preset: null };
+    }
     if (!preset) {
       var sch = quote && quote.schengen;
       return { found: false, outOfRange: false, tip: sch
@@ -606,7 +688,9 @@
       return {
         found: false,
         outOfRange: true,
-        tip: preset.child
+        tip: card
+          ? '新快樂旅平卡專案費率表僅有 ' + minD + '～' + maxD + ' 天（1 天及超過 30 天無費率），目前 ' + d + ' 天無資料，請洽產險（0809-019-888）試算後手填（禁止推估）'
+          : preset.child
           ? '兒童方案（未滿15足歲）保費僅有 ' + minD + '～' + maxD + ' 天，目前 ' + d + ' 天無資料（展業平台試算未含兒童方案 11～30 天），請向產險試算後手填（禁止推估）'
           : '新快樂旅綜+ 自動保費僅有 ' + minD + '～' + maxD + ' 天（2～10 天 DM、11～30 天展業平台試算），目前 ' + d + ' 天無資料，請向產險試算後手填（禁止推估）',
         preset: preset,
@@ -615,7 +699,18 @@
       };
     }
     var prem = table[String(d)];
-    var srcLabel = propertyPremiumSource(d);
+    var srcLabel = propertyPremiumSource(d, quote);
+    if (card) {
+      var ad = cardAddonQuote(quote, d);
+      if (ad.blockedTip) return { found: false, outOfRange: false, ageBlocked: true, tip: ad.blockedTip, preset: preset };
+      var tot = prem + ad.total;
+      return {
+        found: true, premium: tot, basePremium: prem, addons: ad.items, source: srcLabel,
+        tip: '自動：' + comma(tot) + ' 元（' + preset.label + ' ' + comma(prem) + ' 元' +
+          ad.items.map(function (x) { return '＋' + x.name + ' ' + comma(x.premium) + ' 元'; }).join('') + '／' + d + '天／' + srcLabel + '）',
+        preset: preset, dayMin: minD, dayMax: maxD
+      };
+    }
     return {
       found: true,
       premium: prem,
@@ -782,6 +877,8 @@
     detectDomestic: detectDomestic, DOMESTIC_WARNING: DOMESTIC_WARNING,
     AGE_BANDS: AGE_BANDS, ageInfo: ageInfo, isChildQuote: isChildQuote, childOh1Wan: childOh1Wan,
     CHILD_MRC_WAN: CHILD_MRC_WAN, CHILD_OH1_OPTIONS: CHILD_OH1_OPTIONS, propertyAgeCheck: propertyAgeCheck,
+    isCardQuote: isCardQuote, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
+    cardAddonQuote: cardAddonQuote, CARD_SOURCE: CARD_SOURCE,
     BRAND: BRAND, renderBrand: renderBrand, brandLogoReady: function () { return brandLogoReady; },
     renderQuote: renderQuote, renderPlanCard: renderPlanCard, premiumParts: premiumParts, covSource: covSource, planNothingInsured: planNothingInsured, titleFor: titleFor, esc: esc
   };

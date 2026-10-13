@@ -101,7 +101,7 @@ input::placeholder { color: #8b97a5; }
   color: #fff; text-align: center; font-weight: 800; padding: 8px; font-size: 14px; letter-spacing: .06em;
 }
 .sum-hero {
-  background: radial-gradient(120% 140% at 100% 0%, #173c66 0%, #0f2a4a 60%);
+  background: radial-gradient(120% 140% at 100% 0%, #0A6FC2 0%, #00509E 60%);
   color: #fff; padding: 22px 24px 18px; position: relative;
 }
 .sum-hero::after {
@@ -120,29 +120,29 @@ input::placeholder { color: #8b97a5; }
 }
 .sum-card.reco { border: 2px solid #c9a45c; }
 .sum-card-h {
-  background: #0f2a4a; color: #fff; padding: 10px 12px; display: flex; align-items: center; gap: 8px;
+  background: #00509E; color: #fff; padding: 10px 12px; display: flex; align-items: center; gap: 8px;
 }
 .sum-name { font-size: 18px; font-weight: 800; }
-.sum-badge { background: #c9a45c; color: #0f2a4a; font-size: 12px; font-weight: 800; padding: 1px 8px; border-radius: 999px; }
+.sum-badge { background: #c9a45c; color: #00509E; font-size: 12px; font-weight: 800; padding: 1px 8px; border-radius: 999px; }
 .sum-tag { padding: 6px 12px 0; color: #7a5a1c; font-weight: 700; font-size: 13px; }
 .sum-death {
   margin: 8px 10px; padding: 8px; text-align: center; background: #fbf5e8; border: 1px solid #efe0bd; border-radius: 10px;
 }
 .sum-death .lab { font-size: 12px; color: #7a5a1c; font-weight: 700; letter-spacing: .06em; }
-.sum-death .val { font-size: 26px; font-weight: 800; color: #0f2a4a; line-height: 1.2; }
+.sum-death .val { font-size: 26px; font-weight: 800; color: #00509E; line-height: 1.2; }
 .sum-death .br { font-size: 12px; color: #5d6b7a; }
 .sum-cov, .sum-items { list-style: none; margin: 0; padding: 4px 12px 8px; }
 .sum-cov li, .sum-items li {
   display: flex; justify-content: space-between; gap: 6px; padding: 4px 0;
   border-bottom: 1px solid #f0f2f6; font-size: 12.5px;
 }
-.sum-cov li b { color: #0f2a4a; font-size: 14px; }
+.sum-cov li b { color: #00509E; font-size: 14px; }
 .sum-amtcol { display: flex; flex-direction: column; align-items: flex-end; text-align: right; max-width: 62%; }
 .sum-amtcol .sum-br { font-size: 10.5px; color: #5d6b7a; font-weight: 500; line-height: 1.25; margin-top: 1px; }
-.sum-items li span:last-child { color: #0f2a4a; font-weight: 700; text-align: right; max-width: 58%; }
+.sum-items li span:last-child { color: #00509E; font-weight: 700; text-align: right; max-width: 58%; }
 .sum-items li.more { color: #5d6b7a; font-style: italic; border: 0; justify-content: center; }
 .sum-sec {
-  margin: 2px 12px 0; font-size: 12px; font-weight: 800; color: #0f2a4a; letter-spacing: .08em;
+  margin: 2px 12px 0; font-size: 12px; font-weight: 800; color: #00509E; letter-spacing: .08em;
   display: flex; align-items: center; gap: 6px;
 }
 .sum-sec::before { content: ""; width: 3px; height: 12px; background: #c9a45c; border-radius: 2px; }
@@ -153,7 +153,7 @@ input::placeholder { color: #8b97a5; }
 .sum-prem b { font-size: 22px; color: #b3261e; }
 .sum-foot {
   margin: 8px 14px 16px; padding: 14px; border-radius: 14px; text-align: center;
-  background: #0f2a4a; color: #fff; border-top: 3px solid #c9a45c;
+  background: #00509E; color: #fff; border-top: 3px solid #c9a45c;
 }
 .sum-foot .u { color: #e6cf9a; font-size: 13px; letter-spacing: .12em; font-weight: 600; }
 .sum-foot .p { margin-top: 4px; font-size: 16px; }
@@ -164,8 +164,8 @@ input::placeholder { color: #8b97a5; }
   display: flex; align-items: flex-start; gap: 12px; margin-top: 12px; padding: 12px 14px;
   border: 2px solid #c9a45c; border-radius: 12px; background: #fffaf0; cursor: pointer;
 }
-.schengen-toggle input { width: 22px; height: 22px; margin-top: 2px; accent-color: #0f2a4a; flex: 0 0 auto; }
-.schengen-toggle .st-title { font-size: 17px; font-weight: 800; color: #0f2a4a; }
+.schengen-toggle input { width: 22px; height: 22px; margin-top: 2px; accent-color: #00509E; flex: 0 0 auto; }
+.schengen-toggle .st-title { font-size: 17px; font-weight: 800; color: #00509E; }
 .schengen-toggle .st-desc { font-size: 13px; color: #5d6b7a; margin-top: 2px; line-height: 1.45; }
 .simple-amt { font-size: 18px !important; font-weight: 700; padding: 12px 14px !important; }
 .plan-simple-hint { margin: 0 0 10px; color: #2a6b3f; font-size: 14px; font-weight: 600; }
@@ -194,7 +194,7 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 
 /* 年齡提示／超限選項 */
 .dest-warn.soft { background: #fff4e5; border-color: #f0c27a; color: #9a5b00; }
-.age-note { display: block; margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: #eef6ff; color: #173c66; font-size: 12.5px; }
+.age-note { display: block; margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: #eef6ff; color: #0A6FC2; font-size: 12.5px; }
 
 /* 天數：依日期自動（唯讀文字，無輸入框） */
 .date-row { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr minmax(120px, .8fr); gap: 10px 12px; align-items: end; }
@@ -207,7 +207,7 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 
 /* 頁首兩行：標語＋系統名稱 */
 .ed-brand { display: flex; flex-direction: row; align-items: center; gap: 10px; line-height: 1.3; }
-.ed-logo { display: block; width: 34px; height: 48px; flex: none; }
+.ed-logo { display: block; width: 44px; height: auto; object-fit: contain; flex: none; }
 .ed-brand-text { display: flex; flex-direction: column; }
 .ed-slogan { display: block; font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #fff; opacity: .92; }
 .ed-title { display: block; }
@@ -221,7 +221,8 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 
 /* 總表圖品牌列（同編輯器頁首，不含內部使用標記） */
 .sum-brand-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(230, 207, 154, .3); }
-.sum-brand-logo { display: block; width: 40px; height: 57px; flex: none; }
+.sum-hero { position: relative; padding-right: 208px; }
+.sum-brand-logo { position: absolute; top: 24px; right: 24px; width: 160px; height: 160px; object-fit: contain; z-index: 1; }
 .sum-brand-text { display: flex; flex-direction: column; line-height: 1.35; }
 .sum-brand-slogan { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #fff; }
 .sum-brand-title { font-size: 19px; font-weight: 800; color: #e6cf9a; letter-spacing: .02em; }

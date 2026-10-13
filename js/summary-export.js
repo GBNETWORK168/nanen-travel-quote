@@ -67,6 +67,18 @@
     h += '<footer class="sum-foot">';
     h += '<div class="u">富邦人壽 ' + TQ.esc(a.unit || '南恩通訊處') + '</div>';
     h += '<div class="p">' + TQ.esc(a.title || '業務經理') + ' <b>' + TQ.esc(a.name || '陳銘旭') + '</b></div>';
+    if (TQ.isCardQuote && TQ.isCardQuote(quote)) {
+      var cardParts = [];
+      (quote.plans || []).forEach(function (p, i) {
+        if (p.property && p.property.enabled === false) return;
+        var pre = TQ.resolvePropertyPreset(p.property || {}, quote);
+        if (pre) cardParts.push((p.name || ('方案' + (i + 1))) + '：' + pre.plan + ' 組合' + pre.combo);
+      });
+      var adq = TQ.cardAddonQuote(quote, quote.days);
+      h += '<div class="note">產險＝富邦產險 新快樂旅平卡（專案）' + TQ.esc(cardParts.join('／')) +
+        (adq.items.length ? '｜加價購：' + TQ.esc(adq.items.map(function (x) { return x.name + ' ' + TQ.comma(x.premium) + '元'; }).join('、')) + '（已含於產險）' : '') +
+        '｜費率：' + TQ.esc(TQ.CARD_SOURCE) + '</div>';
+    }
     h += '<div class="note">實際以保單條款及核保為準</div>';
     h += '</footer></div>';
     return h;
