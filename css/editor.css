@@ -239,3 +239,4 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 @media (max-width: 560px) { .ed-user-row { grid-template-columns: 1fr 1fr; } .ed-unit { grid-column: 1 / -1; flex-direction: row; align-items: center; } }
 .time-sel { display: flex; align-items: center; gap: 4px; }
 .time-sel select { width: auto; min-width: 64px; }
+#checks, .checks { display: none !important; }
