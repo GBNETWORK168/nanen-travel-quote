@@ -6,7 +6,7 @@
     var mode = quote.dateFormat === 'ad' ? 'ad' : 'roc';
     var dates = '';
     if (quote.startDate || quote.endDate) {
-      dates = TQ.fmtDate(quote.startDate, mode) + ' ～ ' + TQ.fmtDate(quote.endDate, mode);
+      dates = TQ.tripDates(quote, mode);
     }
     var a = quote.agent || {};
     var h = '';

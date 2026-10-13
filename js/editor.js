@@ -126,6 +126,8 @@
     if (!q.lifeRateType) q.lifeRateType = 'agency';
     // 年齡（足歲）：舊稿沒有 → null（編輯器會要求填寫才可產生報價）；年齡帶依年齡自動
     if (q.age === undefined || q.age === '') q.age = null;
+    if (q.startHour === undefined || q.startHour === null) q.startHour = '';
+    if (!q.startMin) q.startMin = '00';
     var ai0 = TQ.ageInfo(q.age);
     if (ai0.valid) q.ageBand = ai0.band;
     if (!q.ageBand) q.ageBand = '18-65';
@@ -173,11 +175,11 @@
   }
   /* ---------- 國內地點（台灣／金門／馬祖／澎湖…）→ 警告＋擋報價 ---------- */
   function isDomesticDest() { return !!TQ.detectDomestic(Q && Q.destination); }
-  /* ---------- 天數：只依出發／回程日自動計算（算頭算尾），無手填欄位 ---------- */
+  /* ---------- 天數：只依出發／回程日自動計算（滿24小時算一天），無手填欄位 ---------- */
   function dateState() {
     var s = TQ.parseDateParts(Q.startDate), e = TQ.parseDateParts(Q.endDate);
     if (s && e) {
-      var d = TQ.daysInclusive(Q.startDate, Q.endDate);
+      var d = TQ.daysInclusive(Q.startDate, Q.endDate, Q);
       if (!d) return { days: null, error: '⚠ 回程日早於出發日，請確認日期' };
       return { days: d };
     }
@@ -200,7 +202,7 @@
     var txt = '', warn = '', soft = false;
     if (st.error) warn = st.error;
     else if (st.days) {
-      txt = '共 ' + st.days + ' 天' + (st.kept ? '（沿用原報價天數；請補填出發／回程日）' : '（算頭算尾）');
+      txt = '共 ' + st.days + ' 天' + (st.kept ? '（沿用原報價天數；請補填出發／回程日）' : '（滿24小時算一天）');
       if (st.days > 30) { soft = true; warn = '⚠ 自動費率僅涵蓋人壽 1～30 天、產險 2～30 天（兒童方案 2～10 天），目前 ' + st.days + ' 天：超出範圍的保費請以 GPTA／產險試算後手填'; }
     }
     if (v) v.textContent = txt;
@@ -820,6 +822,8 @@
     if (mProp) { skipAutoOnce.prop[Number(mProp[1])] = true; Q.plans[Number(mProp[1])].property._premAuto = false; }
 
     // 改關鍵欄位 → 恢復自動
+    if (k === 'age' && Q.birthday) { Q.birthday = ''; var bdEl = form.querySelector('[data-k="birthday"]'); if (bdEl) bdEl.value = ''; applyBirthdayAge(); }
+    if (k === 'birthday' || ((k === 'startDate') && Q.birthday)) { if (applyBirthdayAge()) { skipAutoOnce.life = {}; skipAutoOnce.prop = {}; } }
     if (k === 'age') {
       var aiR = TQ.ageInfo(v);
       if (aiR.valid) {
@@ -856,6 +860,11 @@
       }
     }
 
+    if (k === 'startHour' || k === 'startMin') {
+      syncDaysFromDates();
+      var eh = document.getElementById('endTimeHint'), tt = TQ.tripTime(Q);
+      if (eh) eh.textContent = tt ? '回程時間＝出發時間 ' + tt : '回程時間＝出發時間';
+    }
     if (k === 'startDate' || k === 'endDate') {
       keptLinkDays = false; // 已開始填日期 → 天數一律依日期
       syncDaysFromDates();
@@ -897,7 +906,7 @@
 
   function refreshDerived() {
     syncCardUI();
-    // 起迄日 → 天數（算頭算尾）；必須在保費查表前更新
+    // 起迄日 → 天數（滿24小時算一天）；必須在保費查表前更新
     var dsNow = syncDaysFromDates();
     updateDaysDisplay(dsNow);
     var needRebuild = applyAutoPremiums();
@@ -1043,13 +1052,47 @@
     update();
   }
 
+
+  /* ---------- 生日 → 足歲（以出發日計，未填以今天）；支援民國 71/08/07、710807、0710807 與西元 1982-08-07、19820807 ---------- */
+  function parseBirthday(str) {
+    var t = String(str || '').trim(); if (!t) return null;
+    var y, m, d, mm;
+    if ((mm = /^(\d{2,4})[\/\-.年](\d{1,2})[\/\-.月](\d{1,2})日?$/.exec(t))) { y = +mm[1]; m = +mm[2]; d = +mm[3]; }
+    else if ((mm = /^(\d{2,4})(\d{2})(\d{2})$/.exec(t))) { y = +mm[1]; m = +mm[2]; d = +mm[3]; }
+    else return null;
+    if (y < 1000) y += 1911; // 民國
+    var dt = new Date(y, m - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+    return dt;
+  }
+  function ageFromBirthday(str) {
+    var b = parseBirthday(str); if (!b) return null;
+    var ref = new Date(), s = TQ.parseDateParts(Q.startDate);
+    if (s) ref = new Date(s.y, s.m - 1, s.d);
+    var a = ref.getFullYear() - b.getFullYear();
+    if (ref.getMonth() < b.getMonth() || (ref.getMonth() === b.getMonth() && ref.getDate() < b.getDate())) a--;
+    return (a >= 0 && a <= 120) ? a : null;
+  }
+  function applyBirthdayAge() {
+    var hint = document.getElementById('bdayHint');
+    if (!Q.birthday) { if (hint) { hint.textContent = '填生日自動帶入足歲（以出發日計，未填出發日以今天計）；改年齡會清除生日'; hint.style.color = ''; } return false; }
+    var a = ageFromBirthday(Q.birthday);
+    if (a == null) { if (hint) { hint.textContent = '⚠ 生日格式無法辨識（例：71/08/07、710807、1982-08-07）'; hint.style.color = '#c0392b'; } return false; }
+    Q.age = a;
+    var inp = form.querySelector('[data-k="age"]'); if (inp) inp.value = String(a);
+    var ai = TQ.ageInfo(a);
+    if (ai.valid) { Q.ageBand = ai.band; var ab = form.querySelector('[data-k="ageBand"]'); if (ab) ab.value = ai.band; }
+    if (hint) { hint.textContent = '→ 足歲 ' + a + ' 歲（以' + (TQ.parseDateParts(Q.startDate) ? '出發日' : '今天') + '計）'; hint.style.color = ''; }
+    return true;
+  }
+
   /* ---------- 事件 ---------- */
   form.addEventListener('input', function (e) {
     // SELECT 改由 change 處理，避免 input+change 雙觸發重建
     if (e.target.tagName === 'SELECT') return;
     if (e.target.hasAttribute('data-k')) {
       readInput(e.target);
-      if (e.target.getAttribute('data-k') === 'destination' || e.target.getAttribute('data-k') === 'age') {
+      if (e.target.getAttribute('data-k') === 'destination' || e.target.getAttribute('data-k') === 'age' || e.target.getAttribute('data-k') === 'birthday') {
         // syncSchengenFromDestination 可能已改模式／年齡改變可選保額 → 重建方案表單
         buildPlanUI();
         update();

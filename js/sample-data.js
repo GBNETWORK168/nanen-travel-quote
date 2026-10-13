@@ -5,7 +5,7 @@ window.SAMPLE_QUOTE = {
   "destination": "日本",
   "days": 7,
   "startDate": "2026-10-13",
-  "endDate": "2026-10-19",
+  "endDate": "2026-10-20",
   "dateFormat": "roc",
   "lifeRateType": "agency",
   "lifeRegion": "asia14",

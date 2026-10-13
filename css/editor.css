@@ -237,3 +237,5 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 .ed-unit-lbl { font-size: 13px; color: var(--muted); }
 .ed-unit-val { display: inline-block; padding: 9px 12px; border-radius: 8px; background: #f1f4f8; border: 1px dashed var(--line); color: var(--navy); font-weight: 700; white-space: nowrap; }
 @media (max-width: 560px) { .ed-user-row { grid-template-columns: 1fr 1fr; } .ed-unit { grid-column: 1 / -1; flex-direction: row; align-items: center; } }
+.time-sel { display: flex; align-items: center; gap: 4px; }
+.time-sel select { width: auto; min-width: 64px; }

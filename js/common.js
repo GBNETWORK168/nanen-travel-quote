@@ -287,17 +287,20 @@
     return y + '/' + p.m + '/' + p.d + '（' + WD[dt.getDay()] + '）';
   }
   /**
-   * 投保／旅遊天數：算頭算尾（出發日、回程日都算）。
-   * 例：10/13～10/19 = 7；同一天 = 1。
+   * 投保／旅遊天數：滿24小時算一天（出發→回程日期時間，回程時間＝出發時間；同日算 1 天）。
+   * 例：10/13～10/19 = 6；10/13～10/20 = 7；同一天 = 1。
    * 用 Date.UTC(y,m-1,d) 做日差，不受瀏覽器時區／DST 影響。
    */
-  function daysInclusive(a, b) {
+  function daysInclusive(a, b, q) {
     var p1 = parseDateParts(a), p2 = parseDateParts(b);
     if (!p1 || !p2) return null;
     var t1 = Date.UTC(p1.y, p1.m - 1, p1.d);
     var t2 = Date.UTC(p2.y, p2.m - 1, p2.d);
     if (t2 < t1) return null;
-    return Math.floor((t2 - t1) / 86400000) + 1;
+    // 滿24小時算一天：出發日期時間 → 回程日期時間（回程時間＝出發時間）；有餘數無條件進位；同日最少 1 天
+    var tm = tripTime(q || {}), mins = tm ? (+tm.slice(0, 2)) * 60 + (+tm.slice(3)) : 0;
+    var ms = (t2 + mins * 60000) - (t1 + mins * 60000);
+    return Math.max(1, Math.ceil(ms / 86400000));
   }
 
   /* ---------- 分享連結編解碼（JSON → deflate → base64url，放在 #q=） ---------- */
@@ -495,10 +498,22 @@
     return '<ul class="notes">' + notes.map(function (n) { return '<li>' + esc(n) + '</li>'; }).join('') + '</ul>';
   }
 
+  /** 出發時間（24h，HH:MM；回程時間＝出發時間）；舊連結無時間 → '' */
+  function tripTime(q) {
+    var h = q && q.startHour, m = q && q.startMin;
+    if (h === undefined || h === null || h === '') return '';
+    h = String(h).padStart(2, '0'); m = (m === undefined || m === null || m === '') ? '00' : String(m).padStart(2, '0');
+    return /^([01]\d|2[0-3])$/.test(h) && /^(00|30)$/.test(m) ? h + ':' + m : '';
+  }
+  function tripDates(quote, mode) {
+    if (!(quote.startDate || quote.endDate)) return '';
+    var t = tripTime(quote), ts = t ? ' ' + t : '';
+    return fmtDate(quote.startDate, mode) + (quote.startDate ? ts : '') + ' ～ ' + fmtDate(quote.endDate, mode) + (quote.endDate ? ts : '');
+  }
   function renderHeader(quote) {
     var mode = quote.dateFormat === 'ad' ? 'ad' : 'roc';
     var dates = '';
-    if (quote.startDate || quote.endDate) dates = fmtDate(quote.startDate, mode) + ' ～ ' + fmtDate(quote.endDate, mode);
+    dates = tripDates(quote, mode);
     var kicker = '旅平險 三方案報價' + (quote.schengen ? '　<span class="hero-schengen">申根／計畫二</span>' : '');
     return renderBrand('brand') + '<div class="hero-kicker">' + kicker + '</div>' +
       '<h1 class="hero-title"><span class="dest">' + esc(quote.destination || '—') + '</span><span class="days">' +
@@ -870,7 +885,7 @@
     LIFE_OH1_RATIO: LIFE_OH1_RATIO, PROP_RATIO: PROP_RATIO, REGION_OPTIONS: REGION_OPTIONS,
     num: num, isSet: isSet, comma: comma, fmtYuan: fmtYuan, fmtShort: fmtShort,
     guessRegionPct: guessRegionPct, computePlan: computePlan,
-    fmtDate: fmtDate, daysInclusive: daysInclusive, parseDateParts: parseDateParts,
+    fmtDate: fmtDate, tripTime: tripTime, tripDates: tripDates, daysInclusive: daysInclusive, parseDateParts: parseDateParts,
     encodeQuote: encodeQuote, decodeHash: decodeHash, shareUrl: shareUrl,
     findPropertyPreset: findPropertyPreset, resolvePropertyPreset: resolvePropertyPreset, lookupPropertyPremium: lookupPropertyPremium, propertyPremiumSource: propertyPremiumSource,
     detectSchengen: detectSchengen,
