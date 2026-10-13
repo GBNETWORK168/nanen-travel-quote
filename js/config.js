@@ -8,6 +8,6 @@
  *                    → 匿名流量統計（每日瀏覽、城市／國家、裝置、瀏覽器）
  */
 window.TQ_CONFIG = {
-  USAGE_LOG_URL: '',
+  USAGE_LOG_URL: 'https://script.google.com/macros/s/AKfycbxxZG7lBLZhlaYJaYBUA4NQdWvBZo0yCoqPusQEVqEQKwzlM0jlHUIy7MY96BwPhYoHhQ/exec',
   GOATCOUNTER_CODE: ''
 };
