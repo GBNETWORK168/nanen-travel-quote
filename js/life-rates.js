@@ -73,6 +73,10 @@
     var rateType = quote.lifeRateType || 'agency';
     var region = quote.lifeRegion || guessLifeRegion(quote.destination);
     var oaa = !!life.oaa;
+    // 國外其他（歐洲等）：保費與亞洲14國同表（業務確認），僅保障倍數不同；OAA 僅限亞洲14國 → 以同表（OAA 開）費率計
+    var otherRegion = region === 'other';
+    if (otherRegion) { region = 'asia14'; oaa = true; }
+    var regionTag = otherRegion ? '・國外其他同表' : '';
     // 年齡（足歲）優先；舊稿無年齡才用 ageBand
     var ai = (global.TQ && TQ.ageInfo) ? TQ.ageInfo(quote.age) : { set: false, valid: false };
     if (ai.set && !ai.valid) return { found: false, tip: ai.error };
@@ -91,7 +95,7 @@
         var ru = RATES_U15[u];
         if (Number(ru.days) === days && Number(ru.oh1Wan) === oh) {
           return { found: true, premium: ru.premium, source: META_U15.source,
-            tip: '自動：' + ru.premium.toLocaleString('en-US') + ' 元（GPTA 未滿15歲／' + days + '天／MRC 60萬＋OH1 ' + oh + '萬＋OAA）' };
+            tip: '自動：' + ru.premium.toLocaleString('en-US') + ' 元（GPTA 未滿15歲／' + days + '天／MRC 60萬＋OH1 ' + oh + '萬' + (otherRegion ? '' : '＋OAA') + regionTag + '）' };
         }
       }
       return { found: false, tip: '尚無此組合費率（未滿15歲／' + days + '天／OH1 ' + oh + '萬）；請用 GPTA 試算後手填' };
@@ -142,7 +146,7 @@
         found: true,
         premium: r.premium,
         source: META.source,
-        tip: '自動：' + r.premium.toLocaleString('en-US') + ' 元（GPTA 離線表／' + days + '天／AT1 ' + at1 + '萬）'
+        tip: '自動：' + r.premium.toLocaleString('en-US') + ' 元（GPTA 離線表／' + days + '天／AT1 ' + at1 + '萬' + regionTag + '）'
       };
     }
     return {

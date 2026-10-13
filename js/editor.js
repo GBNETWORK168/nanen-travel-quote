@@ -899,6 +899,8 @@
         if (window.LIFE_RATES) {
           var lr = LIFE_RATES.guessLifeRegion(Q.destination);
           Q.lifeRegion = lr;
+          // OAA 僅限亞洲14國（原邏輯）：依目的地地區開／關
+          Q.plans.forEach(function (p) { if (p.life && p.life.enabled) p.life.oaa = (lr === 'asia14'); });
           var sel = form.querySelector('[data-k="lifeRegion"]');
           if (sel) sel.value = lr;
         }
