@@ -257,13 +257,13 @@
     });
   })();
   /** 下載成功後送使用紀錄（fire-and-forget） */
-  function logSummaryDownload(q) {
+  function logSummaryDownload(q, type) {
     try {
       if (!window.TQ_LOG || !TQ_LOG.enabled) return;
       var ai = TQ.ageInfo(q.age);
       TQ_LOG.logDownload({
         unit: USER_UNIT, name: getUserName(), title: getUserTitle(), destination: q.destination || '', days: q.days || '',
-        startDate: q.startDate || '', endDate: q.endDate || '',
+        startDate: q.startDate || '', endDate: q.endDate || '', downloadType: type || '總圖',
         age: ai.valid ? ai.age : '', ageBand: ai.valid ? ai.label : '',
         plans: (q.plans || []).map(function (p, i) {
           var c = TQ.computePlan(p, q);
@@ -1200,7 +1200,7 @@
       var clean = scrubForSave(Q);
       TQ_SUMMARY.downloadSummaryPng(clean, { only: pi }).then(function (name) {
         toast('已下載 ' + name);
-        logSummaryDownload(clean);
+        logSummaryDownload(clean, '方案' + '一二三'[pi]);
       }).catch(function (err) {
         alert('產生方案圖失敗：' + (err && err.message ? err.message : err));
       }).finally(function () { pb.disabled = false; pb.textContent = label; });
@@ -1213,7 +1213,7 @@
     var clean = scrubForSave(Q);
     TQ_SUMMARY.downloadSummaryPng(clean).then(function (name) {
       toast('已下載 ' + name);
-      logSummaryDownload(clean);
+      logSummaryDownload(clean, '總圖');
     }).catch(function (err) {
       alert('產生總表圖失敗：' + (err && err.message ? err.message : err));
     }).finally(function () {
