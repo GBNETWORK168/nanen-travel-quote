@@ -135,7 +135,7 @@
     if (q.propertyProduct !== 'card') q.propertyProduct = 'combo';
     if (!q.cardAddons || typeof q.cardAddons !== 'object') q.cardAddons = { activity: false, carRental: false };
     if (!q.lifeRegion) {
-      q.lifeRegion = q.schengen ? 'other' : (domesticDest ? 'asia14' : ((window.LIFE_RATES && LIFE_RATES.guessLifeRegion(q.destination)) || 'asia14'));
+      q.lifeRegion = (domesticDest ? 'asia14' : ((window.LIFE_RATES && LIFE_RATES.guessLifeRegion(q.destination)) || 'asia14'));
     }
     // 方案一／二預設含人壽；方案三不含
     q.plans.forEach(function (p, idx) {
@@ -143,7 +143,6 @@
       if (p.property && p.property.cardTier == null) p.property.cardTier = [2, 1, 0][idx] || 0;
       if (p.life && typeof p.life.enabled !== 'boolean') p.life.enabled = idx < 2;
       if (p.life && TQ.CHILD_OH1_OPTIONS.indexOf(Number(p.life.childOh1Wan)) < 0) p.life.childOh1Wan = 60;
-      if (q.schengen && p.life && p.life.enabled) p.life.oaa = false;
       // 對齊 select 可選值
       var sd = snapDeath(p.property.deathWan, !!q.schengen);
       if (sd != null) p.property.deathWan = sd;
@@ -390,27 +389,16 @@
     Q.schengen = !!on;
     // 旅平卡：申根改變 → 回到預設組合（計劃二／三）
     Q.plans.forEach(function (p) { if (p.property) { p.property.cardCombo = ''; p.property._appliedCode = null; } });
+    // 申根只影響產險（人壽地區／OH1 倍數／OAA／保費一律依目的地，與非申根相同）
     if (on) {
-      Q.lifeRegion = 'other';
-      // 申根／歐洲：依目的地套 DM 註3（歐洲＝200%；若判不到則預設 200%）
-      Q.lifeRegionPct = TQ.guessRegionPct(Q.destination) || 200;
-      if (Number(Q.lifeRegionPct) === 100) Q.lifeRegionPct = 200;
       Q.plans.forEach(function (p) {
-        if (p.life && p.life.enabled) {
-          p.life.oaa = false;
-          // 離線表無「國外其他」費率 → 清掉自動壽險保費，改手填
-          if (p.life._premAuto || true) { p.life.premium = null; p.life._premAuto = false; }
-        }
         // 對齊申根可選保額
         if ([200, 300, 500, 1000, 1500].indexOf(Number(p.property.deathWan)) < 0) p.property.deathWan = 500;
         p.property._appliedCode = null; // 強制改套 P2
         if (p.property.planCode && /^P1-G/.test(p.property.planCode)) p.property.planCode = '';
       });
     } else {
-      Q.lifeRegion = (window.LIFE_RATES && LIFE_RATES.guessLifeRegion(Q.destination)) || 'asia14';
-      Q.lifeRegionPct = TQ.guessRegionPct(Q.destination);
       Q.plans.forEach(function (p) {
-        if (p.life && p.life.enabled) p.life.oaa = (Q.lifeRegion === 'asia14');
         // 非申根無 1500 → 對齊最近檔
         var d = Number(p.property.deathWan);
         if ([200, 300, 500, 1000].indexOf(d) < 0) {
@@ -508,9 +496,7 @@
           p.life._premAuto = true;
         } else {
           if (p.life._premAuto || lr.overCap || lr.noRates) p.life.premium = null;
-          p.life._premTip = (Q.schengen && !lr.overCap && !lr.noRates && TQ.ageInfo(Q.age).valid !== false)
-            ? '申根人壽需 GPTA「國外其他」費率（離線表僅亞洲14國＋OAA）；請手填保費'
-            : lr.tip;
+          p.life._premTip = lr.tip;
           p.life._premAuto = false;
         }
       } else if (!window.LIFE_RATES) {
@@ -773,7 +759,7 @@
       p.life.enabled = v > 0;
       if (v > 0) {
         if (child) p.life.childOh1Wan = v; else p.life.at1Wan = v;
-        if (!was) p.life.oaa = !Q.schengen && Q.lifeRegion === 'asia14';
+        if (!was) p.life.oaa = Q.lifeRegion === 'asia14';
       }
       p.life.premium = v > 0 ? null : 0;
       delete skipAutoOnce.life[i];
@@ -903,23 +889,19 @@
       syncSchengenFromDestination();
       // 人壽 OH1 地區比例：一律依目的地重判（申根模式若仍 100% 會在 applySchengenMode 抬到 200%）
       var g = TQ.guessRegionPct(Q.destination);
-      if (Q.schengen && Number(g) === 100) g = 200;
       if (g !== Q.lifeRegionPct) { Q.lifeRegionPct = g; form.querySelector('[data-k="lifeRegionPct"]').value = g; }
       else {
         var lpEl = form.querySelector('[data-k="lifeRegionPct"]');
         if (lpEl) lpEl.value = Q.lifeRegionPct;
       }
       // 人壽地區：若已（自動）申根，applySchengenMode 已設 other；否則依目的地猜
-      if (!Q.schengen) {
+      {
         if (window.LIFE_RATES) {
           var lr = LIFE_RATES.guessLifeRegion(Q.destination);
           Q.lifeRegion = lr;
           var sel = form.querySelector('[data-k="lifeRegion"]');
           if (sel) sel.value = lr;
         }
-      } else {
-        var sel2 = form.querySelector('[data-k="lifeRegion"]');
-        if (sel2) sel2.value = Q.lifeRegion;
       }
     }
     if (/\.name$/.test(k) && /^plans\.\d+\.name$/.test(k)) {
