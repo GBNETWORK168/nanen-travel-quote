@@ -461,6 +461,7 @@
       return x.name + ' ' + comma(x.premium) + ' 元（' + (x.coverage || []).map(function (c) { return c.name + ' ' + c.amount; }).join('、') + '）';
     });
   }
+  function schengenBadge(quote) { return isCardQuote(quote) ? '申根／計劃三' : '申根／計畫二'; }
   function renderNotes(quote) {
     var notes = [];
     var anyLife = (quote.plans || []).some(function (p) { return p.life && p.life.enabled; });
@@ -477,7 +478,7 @@
       if (adn.length) notes.push('產險加價購（已含於產險保費）：' + adn.join('；') + '。');
     }
     if (quote.schengen && cardQ) {
-      notes.push('申根行程：請隨身攜帶申根地區醫療旅遊保險英文投保憑證（出發前 7 個工作日投保）。人壽為國外其他地區（OAA 不適用），保費請以 GPTA 試算為準。');
+      notes.push('申根行程：產險已套用新快樂旅平卡計劃三；申根地區需出發前7個工作天投保以開立英文憑證，請隨身攜帶申根地區醫療旅遊保險英文投保憑證。人壽為國外其他地區（OAA 不適用），保費請以 GPTA 試算為準。');
     } else if (quote.schengen) {
       notes.push('申根行程：產險已套用計畫二；請隨身攜帶申根地區醫療旅遊保險英文投保憑證。人壽為國外其他地區（OAA 不適用），保費請以 GPTA 試算為準。');
     }
@@ -514,7 +515,7 @@
     var mode = quote.dateFormat === 'ad' ? 'ad' : 'roc';
     var dates = '';
     dates = tripDates(quote, mode);
-    var kicker = '旅平險 三方案報價' + (quote.schengen ? '　<span class="hero-schengen">申根／計畫二</span>' : '');
+    var kicker = '旅平險 三方案報價' + (quote.schengen ? '　<span class="hero-schengen">' + schengenBadge(quote) + '</span>' : '');
     return renderBrand('brand') + '<div class="hero-kicker">' + kicker + '</div>' +
       '<h1 class="hero-title"><span class="dest">' + esc(quote.destination || '—') + '</span><span class="days">' +
       esc(quote.days || '—') + '<small> 天</small></span></h1>' +
@@ -892,7 +893,7 @@
     detectDomestic: detectDomestic, DOMESTIC_WARNING: DOMESTIC_WARNING,
     AGE_BANDS: AGE_BANDS, ageInfo: ageInfo, isChildQuote: isChildQuote, childOh1Wan: childOh1Wan,
     CHILD_MRC_WAN: CHILD_MRC_WAN, CHILD_OH1_OPTIONS: CHILD_OH1_OPTIONS, propertyAgeCheck: propertyAgeCheck,
-    isCardQuote: isCardQuote, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
+    isCardQuote: isCardQuote, schengenBadge: schengenBadge, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
     cardAddonQuote: cardAddonQuote, CARD_SOURCE: CARD_SOURCE,
     BRAND: BRAND, renderBrand: renderBrand, brandLogoReady: function () { return brandLogoReady; },
     renderQuote: renderQuote, renderPlanCard: renderPlanCard, premiumParts: premiumParts, covSource: covSource, planNothingInsured: planNothingInsured, titleFor: titleFor, esc: esc

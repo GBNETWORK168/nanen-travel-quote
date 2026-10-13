@@ -581,7 +581,7 @@
     options.forEach(function (o) {
       var val = (o && typeof o === 'object') ? o.value : o;
       var lab = (o && typeof o === 'object') ? o.label : (o + ' 萬');
-      h += '<option value="' + esc(String(val)) + '">' + esc(String(lab)) + '</option>';
+      h += '<option value="' + esc(String(val)) + '"' + (o && o.disabled ? ' disabled' : '') + '>' + esc(String(lab)) + '</option>';
     });
     h += '</select>';
     if (opts.hint) h += '<span class="hint' + (opts.auto ? ' auto' : '') + '" data-hint="' + key + '">' + esc(opts.hint) + '</span>';
@@ -652,12 +652,19 @@
     }
     if (TQ.isCardQuote(Q)) {
       var curCard = TQ.resolvePropertyPreset(plan.property, Q);
-      var cardOpts = TQ.cardPresets().map(function (cp) {
-        var ok = !ai.valid || (ai.age >= cp.ageMin && ai.age <= cp.ageMax);
-        return { value: cp.combo, label: cp.plan + ' 組合' + cp.combo + '（' + cp.ageLabel + (cp.deathWan ? '・身故' + cp.deathWan + '萬' : '・兒童') + '・住院' + cp.hospitalWan + '萬）' + (ok ? '' : '｜年齡不符') };
-      });
-      h += selectField('產險 新快樂旅平卡組合', b + '_propSel', ZERO.concat(cardOpts), {
-        hint: hasProp ? ((curCard ? curCard.planName + '；' : '') + '計劃二＝國外旅遊、計劃三＝醫療加值／申根；組合愈大保障愈高') : '產險不投保（保費 0，不列不便險／產險保障）',
+      var cardOpts;
+      if (child) {
+        var cc = cardComboFor(1, true);
+        cardOpts = [{ value: 1, label: '兒童組合（' + (cc ? cc.plan + ' 組合' + cc.combo : '—') + '・無身故失能）' }];
+      } else {
+        cardOpts = CARD_DEATHS.map(function (d) {
+          var cp = cardComboFor(d, false);
+          var ok = cp && (!ai.valid || (ai.age >= cp.ageMin && ai.age <= cp.ageMax));
+          return { value: d, disabled: !ok, label: d + ' 萬' + (cp ? '（' + cp.plan + ' 組合' + cp.combo + (d === 1500 && !Q.schengen ? '・僅計劃三' : '') + '）' : '') + (ok ? '' : '｜年齡不符（' + (cp ? cp.ageLabel : '') + '）') };
+        });
+      }
+      h += selectField('產險保額（萬）新快樂旅平卡', b + '_propSel', ZERO.concat(cardOpts), {
+        hint: hasProp ? ((curCard ? curCard.plan + ' 組合' + curCard.combo + '（住院' + curCard.hospitalWan + '萬）；' : '') + (Q.schengen ? '申根→計劃三（醫療加值／申根適用）' : '計劃二＝國外旅遊；1500 萬僅計劃三')) : '產險不投保（保費 0，不列不便險／產險保障）',
         auto: true
       });
     } else if (child) {
@@ -737,6 +744,13 @@
       else el.value = (v === null || v === undefined) ? '' : v;
     });
   }
+  /** 旅平卡：身故失能保額 → 組合（計劃二／三依申根；1500 萬只有計劃三 組合17；兒童 7／12） */
+  var CARD_DEATHS = [100, 300, 500, 1000, 1500];
+  function cardComboFor(death, child) {
+    var list = TQ.cardPresets(), sch = !!Q.schengen;
+    var pick = function (want) { for (var i = 0; i < list.length; i++) { var c = list[i]; if (child ? (c.child && c.schengen === want) : (!c.child && c.schengen === want && Number(c.deathWan) === Number(death))) return c; } return null; };
+    return pick(sch) || pick(!sch);
+  }
   /** 人壽／產險選單目前值：0＝不投保 */
   function selValue(plan, side) {
     var child = TQ.isChildQuote(Q);
@@ -744,7 +758,7 @@
     if (TQ.isCardQuote(Q)) {
       if (plan.property.enabled === false) return 0;
       var cp = TQ.resolvePropertyPreset(plan.property, Q);
-      return cp ? cp.combo : 0;
+      return cp ? (cp.child ? 1 : Number(cp.deathWan)) : 0;
     }
     return plan.property.enabled === false ? 0 : (child ? 1 : plan.property.deathWan);
   }
@@ -763,7 +777,7 @@
       delete skipAutoOnce.life[i];
     } else if (TQ.isCardQuote(Q)) {
       p.property.enabled = v > 0;
-      if (v > 0) p.property.cardCombo = String(v);
+      if (v > 0) { var cpx = cardComboFor(v, child); p.property.cardCombo = cpx ? String(cpx.combo) : ''; }
       p.property._appliedCode = null;
       if (!(v > 0)) p.property.premium = 0;
       delete skipAutoOnce.prop[i];
@@ -824,6 +838,14 @@
     // 改關鍵欄位 → 恢復自動
     if (k === 'age' && Q.birthday) { Q.birthday = ''; var bdEl = form.querySelector('[data-k="birthday"]'); if (bdEl) bdEl.value = ''; applyBirthdayAge(); }
     if (k === 'birthday' || ((k === 'startDate') && Q.birthday)) { if (applyBirthdayAge()) { skipAutoOnce.life = {}; skipAutoOnce.prop = {}; } }
+    if ((k === 'age' || k === 'birthday') && TQ.isCardQuote(Q)) {
+      // 旅平卡：手選組合不涵蓋新年齡（含成人↔兒童）→ 回預設組合
+      var aiC2 = TQ.ageInfo(Q.age);
+      Q.plans.forEach(function (p) {
+        var cp = p.property && p.property.cardCombo && TQ.cardPresetByCombo(p.property.cardCombo);
+        if (cp && aiC2.valid && !(aiC2.age >= cp.ageMin && aiC2.age <= cp.ageMax)) { p.property.cardCombo = ''; p.property._appliedCode = null; }
+      });
+    }
     if (k === 'age') {
       var aiR = TQ.ageInfo(v);
       if (aiR.valid) {
