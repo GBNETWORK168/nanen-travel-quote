@@ -240,3 +240,10 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 .time-sel { display: flex; align-items: center; gap: 4px; }
 .time-sel select { width: auto; min-width: 64px; }
 #checks, .checks { display: none !important; }
+/* 單一方案報價圖 */
+.sum-root.sum-single { width: 520px; }
+.sum-single .sum-plans { grid-template-columns: 1fr; }
+.sum-notes { padding: 4px 18px 10px; font-size: 12px; color: #4a5866; }
+.sum-notes ul { margin: 0; padding-left: 1.2em; }
+.sum-notes li { margin: 2px 0; line-height: 1.5; }
+.ed-actions .btn-plan { padding-left: 10px; padding-right: 10px; }

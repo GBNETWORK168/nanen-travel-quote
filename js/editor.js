@@ -277,7 +277,7 @@
   }
 
   /** 擋下產生報價的問題（國內目的地、日期未填／回程早於出發、年齡未填／無效、AT1 超過年齡上限、產險方案不符 DM 投保年齡） */
-  function quoteBlockers() {
+  function quoteBlockers(only) {
     var out = [];
     if (missingUserFields().length) out.push(userBlockerMsg());
     if (isDomesticDest()) out.push(TQ.DOMESTIC_WARNING);
@@ -287,6 +287,7 @@
     var ai = TQ.ageInfo(Q && Q.age);
     if (!ai.valid) { out.push('⚠ ' + ai.error); return out; }
     Q.plans.forEach(function (p, i) {
+      if (only != null && i !== only) return;
       var n = p.name || ('方案' + (i + 1));
       if (p.life && p.life.enabled && !ai.child && TQ.num(p.life.at1Wan) > ai.at1Max) {
         out.push('⚠ ' + n + '：人壽 AT1 ' + p.life.at1Wan + ' 萬超過「' + ai.label + '」上限 ' + ai.at1Max + ' 萬，請調降');
@@ -342,10 +343,11 @@
     if (inp) { inp.classList.toggle('is-domestic', dom); inp.setAttribute('aria-invalid', dom ? 'true' : 'false'); }
     updateAgeWarning();
     updateUserWarning();
-    var bl = quoteBlockers();
-    ['btnSummaryPng'].forEach(function (id) {
-      var b = document.getElementById(id);
+    [['btnSummaryPng', null], ['btnPlanPng0', 0], ['btnPlanPng1', 1], ['btnPlanPng2', 2]].forEach(function (pair) {
+      var b = document.getElementById(pair[0]);
       if (!b) return;
+      var bl = quoteBlockers(pair[1]);
+      if (pair[1] != null) b.textContent = '⬇ ' + (Q.plans[pair[1]].name || ('方案' + '一二三'[pair[1]])) + '下載';
       b.classList.toggle('is-blocked', bl.length > 0);
       b.setAttribute('aria-disabled', bl.length ? 'true' : 'false');
       if (bl.length) b.title = bl.join('\n'); else b.removeAttribute('title');
@@ -354,8 +356,8 @@
     return dom;
   }
   /** 有任何擋報價問題時擋下下載總表圖；回傳 true 表示已擋 */
-  function blockIfDomestic() {
-    var bl = quoteBlockers();
+  function blockIfDomestic(only) {
+    var bl = quoteBlockers(only);
     if (!bl.length) return false;
     updateDomesticWarning();
     alert(bl.join('\n'));
@@ -1188,6 +1190,22 @@
   });
 
 
+  [0, 1, 2].forEach(function (pi) {
+    var pb = document.getElementById('btnPlanPng' + pi);
+    if (!pb) return;
+    pb.addEventListener('click', function () {
+      if (blockIfDomestic(pi)) return;
+      var label = pb.textContent;
+      pb.disabled = true; pb.textContent = '產生中…';
+      var clean = scrubForSave(Q);
+      TQ_SUMMARY.downloadSummaryPng(clean, { only: pi }).then(function (name) {
+        toast('已下載 ' + name);
+        logSummaryDownload(clean);
+      }).catch(function (err) {
+        alert('產生方案圖失敗：' + (err && err.message ? err.message : err));
+      }).finally(function () { pb.disabled = false; pb.textContent = label; });
+    });
+  });
   document.getElementById('btnSummaryPng').addEventListener('click', function () {
     if (blockIfDomestic()) return;
     var btn = document.getElementById('btnSummaryPng');
@@ -1199,7 +1217,7 @@
     }).catch(function (err) {
       alert('產生總表圖失敗：' + (err && err.message ? err.message : err));
     }).finally(function () {
-      btn.disabled = false; btn.textContent = '🖼 下載三方案總表圖';
+      btn.disabled = false; btn.textContent = '🖼 三方案總圖下載';
     });
   });
 
