@@ -24,7 +24,7 @@
     prefix = prefix || 'brand';
     return '<img class="' + prefix + '-logo" src="' + BRAND.logo + '" alt="' + BRAND.logoAlt + '" width="160" height="160">' +
       '<div class="' + prefix + '-bar">' +
-      '<div class="' + prefix + '-text"><div class="' + prefix + '-slogan">' + BRAND.slogan + '</div>' +
+      '<div class="' + prefix + '-text">' +
       '<div class="' + prefix + '-title">' + BRAND.title + '</div></div></div>';
   }
 
