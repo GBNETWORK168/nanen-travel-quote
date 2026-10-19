@@ -11,31 +11,32 @@ window.SAMPLE_QUOTE = {
   "lifeRegion": "asia14",
   "ageBand": "18-65",
   "lifeRegionPct": 200,
+  "planLayout": 2,
   "plans": [
     {
       "name": "方案一",
-      "tagline": "雙實支＋醫療額度高＋不便險",
-      "recommended": true,
+      "tagline": "基本保障＋不便險",
+      "recommended": false,
       "life": {
-        "enabled": true,
-        "at1Wan": 500,
+        "enabled": false,
+        "at1Wan": null,
         "oh1Wan": null,
         "mrWan": null,
-        "oaa": true,
+        "oaa": false,
         "hospitalYuan": null,
         "outpatientYuan": null,
         "erYuan": null,
-        "premium": 982
+        "premium": null
       },
       "property": {
-        "planCode": "P1-G500",
-        "label": "新快樂旅綜+ 計畫一 一般500萬",
-        "deathWan": 500,
-        "hospitalWan": 50,
-        "outpatientYuan": 10000,
-        "erYuan": 25000,
-        "accidentMedicalWan": 50,
-        "premium": 1205
+        "planCode": "P1-G300",
+        "label": "新快樂旅綜+ 計畫一 一般300萬",
+        "deathWan": 300,
+        "hospitalWan": 30,
+        "outpatientYuan": 6000,
+        "erYuan": 15000,
+        "accidentMedicalWan": 30,
+        "premium": 833
       },
       "inconvenience": [
         {
@@ -48,7 +49,7 @@ window.SAMPLE_QUOTE = {
         },
         {
           "name": "班機延誤（4小時以上）",
-          "amount": "每4小時6,000元，每次最高12,000元，保期內限2次"
+          "amount": "每4小時5,000元，每次最高10,000元，保期內限2次"
         },
         {
           "name": "行李延誤（6小時以上）",
@@ -86,11 +87,11 @@ window.SAMPLE_QUOTE = {
         },
         {
           "name": "信用卡盜用損失",
-          "amount": "3萬"
+          "amount": "1萬"
         },
         {
           "name": "信用卡購物保障",
-          "amount": "3萬"
+          "amount": "1萬"
         },
         {
           "name": "水陸公共交通工具延誤",
@@ -218,28 +219,28 @@ window.SAMPLE_QUOTE = {
     },
     {
       "name": "方案三",
-      "tagline": "基本保障＋不便險",
-      "recommended": false,
+      "tagline": "雙實支＋醫療額度高＋不便險",
+      "recommended": true,
       "life": {
-        "enabled": false,
-        "at1Wan": null,
+        "enabled": true,
+        "at1Wan": 500,
         "oh1Wan": null,
         "mrWan": null,
-        "oaa": false,
+        "oaa": true,
         "hospitalYuan": null,
         "outpatientYuan": null,
         "erYuan": null,
-        "premium": null
+        "premium": 982
       },
       "property": {
-        "planCode": "P1-G300",
-        "label": "新快樂旅綜+ 計畫一 一般300萬",
-        "deathWan": 300,
-        "hospitalWan": 30,
-        "outpatientYuan": 6000,
-        "erYuan": 15000,
-        "accidentMedicalWan": 30,
-        "premium": 833
+        "planCode": "P1-G500",
+        "label": "新快樂旅綜+ 計畫一 一般500萬",
+        "deathWan": 500,
+        "hospitalWan": 50,
+        "outpatientYuan": 10000,
+        "erYuan": 25000,
+        "accidentMedicalWan": 50,
+        "premium": 1205
       },
       "inconvenience": [
         {
@@ -252,7 +253,7 @@ window.SAMPLE_QUOTE = {
         },
         {
           "name": "班機延誤（4小時以上）",
-          "amount": "每4小時5,000元，每次最高10,000元，保期內限2次"
+          "amount": "每4小時6,000元，每次最高12,000元，保期內限2次"
         },
         {
           "name": "行李延誤（6小時以上）",
@@ -290,11 +291,11 @@ window.SAMPLE_QUOTE = {
         },
         {
           "name": "信用卡盜用損失",
-          "amount": "1萬"
+          "amount": "3萬"
         },
         {
           "name": "信用卡購物保障",
-          "amount": "1萬"
+          "amount": "3萬"
         },
         {
           "name": "水陸公共交通工具延誤",

@@ -7,6 +7,24 @@
   var STORE_KEY_LEGACY = 'tq-editor-draft-v1';
   /** 草稿結構版：選單保額／AT1 100萬刻度；舊稿需 migrate */
   var DRAFT_VERSION = 2;
+  /** 方案排列版：2＝方案一「單獨產險（基本保障＋不便險）」、方案三「雙實支＋醫療額度高＋不便險（推薦）」（2026-10-19 方案一、三對調）
+   *  無此欄位＝舊排列（方案一雙實支＋推薦、方案三單獨產險）。舊分享連結內容完整保存在連結裡，依舊排列顯示、不會錯位。 */
+  var PLAN_LAYOUT = 2;
+  var LAYOUT_DEFAULTS = {
+    1: { tag: ['雙實支＋醫療額度高＋不便險', '雙實支保障＋不便險', '基本保障＋不便險'], code: ['P1-G500', 'P1-G300', 'P1-G300'], death: [500, 300, 300], at1: [500, 300, null], life: [true, true, false], tier: [2, 1, 0], reco: 0 },
+    2: { tag: ['基本保障＋不便險', '雙實支保障＋不便險', '雙實支＋醫療額度高＋不便險'], code: ['P1-G300', 'P1-G300', 'P1-G500'], death: [300, 300, 500], at1: [null, 300, 500], life: [false, true, true], tier: [0, 1, 2], reco: 2 }
+  };
+  function layoutOf(q) { return LAYOUT_DEFAULTS[(q && Number(q.planLayout)) === 2 ? 2 : 1]; }
+  /** 舊排列草稿（localStorage）→ 新排列：方案一、三內容對調，方案名稱維持依位置（方案一／二／三） */
+  function swapLegacyLayout(q) {
+    if (!q || !q.plans || q.planLayout != null || q.plans.length < 3) return q;
+    var a = q.plans[0], c = q.plans[2];
+    var n0 = a.name, n2 = c.name;
+    q.plans[0] = c; q.plans[2] = a;
+    if (n0 === '方案一' && n2 === '方案三') { q.plans[0].name = '方案一'; q.plans[2].name = '方案三'; }
+    q.planLayout = PLAN_LAYOUT;
+    return q;
+  }
   var PRESETS = (window.PROPERTY_PRESETS && window.PROPERTY_PRESETS.plans) || [];
   var form = document.getElementById('form');
   var preview = document.getElementById('preview');
@@ -61,12 +79,12 @@
       // 清掉舊 planCode，改由保額對應 P1/P2，避免蓋回 select
       if (p.property.planCode) p.property.planCode = '';
       p.property._appliedCode = null;
-      var defDeath = [500, 300, 300][i];
+      var defDeath = layoutOf(q).death[i];
       var d = snapDeath(p.property.deathWan, sch);
       p.property.deathWan = d != null ? d : defDeath;
-      if (p.life.enabled !== false && i < 2) {
+      if (p.life.enabled !== false && layoutOf(q).life[i]) {
         var a = snapAt1(p.life.at1Wan);
-        p.life.at1Wan = a != null ? a : [500, 300][i];
+        p.life.at1Wan = a != null ? a : layoutOf(q).at1[i];
       }
     }
     q._draftVersion = DRAFT_VERSION;
@@ -83,8 +101,10 @@
     try { q = JSON.parse(raw); } catch (e3) { return null; }
     if (!q || typeof q !== 'object') return null;
     var ver = Number(q._draftVersion || 0);
-    if (ver < DRAFT_VERSION || fromLegacy) {
-      q = migrateDraft(q);
+    var needLayout = q.planLayout == null;
+    if (ver < DRAFT_VERSION || fromLegacy) q = migrateDraft(q);
+    if (needLayout) q = swapLegacyLayout(q);
+    if (ver < DRAFT_VERSION || fromLegacy || needLayout) {
       try {
         localStorage.removeItem(STORE_KEY_LEGACY);
         if (q) localStorage.setItem(STORE_KEY, JSON.stringify(q));
@@ -93,13 +113,14 @@
     return q;
   }
 
-  function blankPlan(i) {
-    var tag = ['雙實支＋醫療額度高＋不便險', '雙實支保障＋不便險', '基本保障＋不便險'][i] || '';
-    var codes = ['P1-G500', 'P1-G300', 'P1-G300'];
+  function blankPlan(i, L) {
+    L = L || LAYOUT_DEFAULTS[PLAN_LAYOUT];
+    var tag = L.tag[i] || '';
     return {
-      name: '方案' + '一二三'[i], tagline: tag, recommended: i === 0,
-      life: { enabled: i < 2, at1Wan: [500, 300, null][i], childOh1Wan: 60, oh1Wan: null, mrWan: null, oaa: true, hospitalYuan: null, outpatientYuan: null, erYuan: null, premium: null },
-      property: { planCode: codes[i], label: '', deathWan: [500, 300, 300][i], hospitalWan: null, outpatientYuan: null, erYuan: null, accidentMedicalWan: null, premium: null },
+      name: '方案' + '一二三'[i], tagline: tag, recommended: i === L.reco,
+      // 單獨產險方案：人壽不投保（AT1 保額預設 0／空白）
+      life: { enabled: !!L.life[i], at1Wan: L.at1[i], childOh1Wan: 60, oh1Wan: null, mrWan: null, oaa: true, hospitalYuan: null, outpatientYuan: null, erYuan: null, premium: null },
+      property: { planCode: L.code[i], label: '', deathWan: L.death[i], hospitalWan: null, outpatientYuan: null, erYuan: null, accidentMedicalWan: null, premium: null },
       inconvenience: [], others: []
     };
   }
@@ -107,14 +128,18 @@
     q = q || {};
     q.v = 1;
     q.plans = q.plans || [];
-    for (var i = 0; i < 3; i++) if (!q.plans[i]) q.plans[i] = blankPlan(i);
+    var hadPlans = q.plans.length > 0;
+    // 全新報價 → 新排列；既有資料（舊分享連結）沒有 planLayout → 依舊排列補預設，不錯位
+    if (!hadPlans) q.planLayout = PLAN_LAYOUT;
+    var L = layoutOf(q);
+    for (var i = 0; i < 3; i++) if (!q.plans[i]) q.plans[i] = blankPlan(i, L);
     q.plans.forEach(function (p, idx) {
       p.life = p.life || {}; p.property = p.property || {};
       p.inconvenience = p.inconvenience || []; p.others = p.others || [];
       if (!p.property.planCode) {
         var hit = TQ.findPropertyPreset(p.property);
         if (hit) p.property.planCode = hit.code;
-        else if (!p.property.planCode) p.property.planCode = ['P1-G500', 'P1-G300', 'P1-G300'][idx];
+        else if (!p.property.planCode) p.property.planCode = L.code[idx];
       }
     });
     q.agent = q.agent || { unit: '南恩通訊處', name: '陳銘旭', title: '業務經理' };
@@ -137,22 +162,24 @@
     if (!q.lifeRegion) {
       q.lifeRegion = (domesticDest ? 'asia14' : ((window.LIFE_RATES && LIFE_RATES.guessLifeRegion(q.destination)) || 'asia14'));
     }
-    // 方案一／二預設含人壽；方案三不含
+    // 新排列：方案一單獨產險（不含人壽）；方案二／三預設含人壽（舊排列：方案一／二含人壽、方案三不含）
     q.plans.forEach(function (p, idx) {
-      // 旅平卡專案預設檔次：方案一較高、方案三最便宜（皆為涵蓋年齡之組合）
-      if (p.property && p.property.cardTier == null) p.property.cardTier = [2, 1, 0][idx] || 0;
-      if (p.life && typeof p.life.enabled !== 'boolean') p.life.enabled = idx < 2;
+      // 旅平卡專案預設檔次：雙實支＋醫療額度高方案最高、單獨產險方案最便宜（皆為涵蓋年齡之組合）
+      if (p.property && p.property.cardTier == null) p.property.cardTier = L.tier[idx] || 0;
+      if (p.life && typeof p.life.enabled !== 'boolean') p.life.enabled = !!L.life[idx];
       if (p.life && TQ.CHILD_OH1_OPTIONS.indexOf(Number(p.life.childOh1Wan)) < 0) p.life.childOh1Wan = 60;
       // 對齊 select 可選值
       var sd = snapDeath(p.property.deathWan, !!q.schengen);
       if (sd != null) p.property.deathWan = sd;
-      else if (!TQ.num(p.property.deathWan)) p.property.deathWan = [500, 300, 300][idx];
+      else if (!TQ.num(p.property.deathWan)) p.property.deathWan = L.death[idx];
       if (p.life && p.life.enabled) {
         var sa = snapAt1(p.life.at1Wan);
         if (sa != null) p.life.at1Wan = sa;
-        else if (!TQ.num(p.life.at1Wan)) p.life.at1Wan = [500, 300][idx];
+        else if (!TQ.num(p.life.at1Wan)) p.life.at1Wan = L.at1[idx] || 300;
       }
     });
+    // 標記排列版（舊連結維持舊排列＝1，避免存成草稿後又被當成舊草稿對調）
+    if (q.planLayout == null) q.planLayout = 1;
     q._draftVersion = DRAFT_VERSION;
     return q;
   }
