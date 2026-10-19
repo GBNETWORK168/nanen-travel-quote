@@ -379,18 +379,33 @@
   function planNothingInsured(plan) {
     return !(plan.life && plan.life.enabled) && plan.property && plan.property.enabled === false;
   }
+  /**
+   * 排版用斷行：文字切成不可拆的片段（<span class="nw">），只允許在「，、；＋/」之後或「（」之前換行，
+   * 避免「行李延誤（6小時」｜「以上）」、「保期」｜「內限2次」這種從詞中間斷開。回傳已跳脫的 HTML。
+   */
+  function niceText(s) {
+    s = String(s === null || s === undefined ? '' : s);
+    if (!s) return '';
+    var parts = [], buf = '';
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if ((ch === '（' || ch === '(') && buf && !/[\s　]$/.test(buf)) { parts.push(buf); buf = ''; }
+      buf += ch;
+      if ('，、；＋/／'.indexOf(ch) >= 0) { parts.push(buf); buf = ''; }
+    }
+    if (buf) parts.push(buf);
+    return parts.map(function (p) { return '<span class="nw">' + esc(p) + '</span>'; }).join('<wbr>');
+  }
   function row(label, total, br, sub) {
-    return '<div class="cov-row"><div class="cov-label">' + esc(label) +
-      (sub ? '<span class="cov-sub">' + esc(sub) + '</span>' : '') + '</div>' +
-      '<div class="cov-val"><strong>' + esc(total) + '</strong></div><div class="cov-br">' + esc(br) + '</div></div>';
+    return '<div class="cov-row"><div class="cov-label">' + niceText(label) +
+      (sub ? '<span class="cov-sub">' + niceText(sub) + '</span>' : '') + '</div>' +
+      '<div class="cov-val"><strong>' + esc(total) + '</strong></div><div class="cov-br">' + niceText(br) + '</div></div>';
   }
   function itemList(items) {
     if (!items || !items.length) return '<p class="empty">（未列項目）</p>';
     return '<ul class="items">' + items.map(function (it) {
-      var amt = String(it.amount === null || it.amount === undefined ? '' : it.amount).split('，').map(function (part) {
-        return '<span class="nw">' + esc(part) + '</span>';
-      }).join('，<wbr>');
-      return '<li><span class="it-name">' + esc(it.name) + '</span><span class="it-amt">' + (amt || '—') + '</span></li>';
+      var amt = niceText(it.amount);
+      return '<li><span class="it-name">' + niceText(it.name) + '</span><span class="it-amt">' + (amt || '—') + '</span></li>';
     }).join('') + '</ul>';
   }
 
@@ -902,6 +917,6 @@
     isCardQuote: isCardQuote, renderNotes: renderNotes, displayTagline: displayTagline, schengenBadge: schengenBadge, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
     cardAddonQuote: cardAddonQuote, CARD_SOURCE: CARD_SOURCE,
     BRAND: BRAND, renderBrand: renderBrand, brandLogoReady: function () { return brandLogoReady; },
-    renderQuote: renderQuote, renderPlanCard: renderPlanCard, premiumParts: premiumParts, covSource: covSource, planNothingInsured: planNothingInsured, titleFor: titleFor, esc: esc
+    renderQuote: renderQuote, renderPlanCard: renderPlanCard, premiumParts: premiumParts, covSource: covSource, planNothingInsured: planNothingInsured, titleFor: titleFor, esc: esc, niceText: niceText
   };
 })(window);

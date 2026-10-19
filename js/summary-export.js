@@ -34,37 +34,38 @@
       h += '<div class="sum-tag">' + TQ.esc(TQ.displayTagline(plan)) + '</div>';
       if (c.child) {
         h += '<div class="sum-death"><div class="lab">' + (on ? '人壽兒童主約 MRC' : '意外身故・失能') + '</div><div class="val">' + (on ? TQ.esc(TQ.fmtYuan(L.mrc)) : '—') + '</div>';
-        h += '<div class="br">' + TQ.esc(on ? '兒童傷害醫療旅平險（未滿15足歲無 AT1）' : '未滿15足歲：產險兒童方案無身故・失能') + '</div></div>';
+        h += '<div class="br">' + TQ.niceText(on ? '兒童傷害醫療旅平險（未滿15足歲無 AT1）' : '未滿15足歲：產險兒童方案無身故・失能') + '</div></div>';
       } else {
         h += '<div class="sum-death"><div class="lab">意外身故・失能</div><div class="val">' + TQ.esc(TQ.fmtYuan(c.death)) + '</div>';
-        h += '<div class="br">' + TQ.esc(TQ.covSource(on, TQ.fmtShort(L.at1), pOn, TQ.fmtShort(P.death))) + '</div></div>';
+        h += '<div class="br">' + TQ.niceText(TQ.covSource(on, TQ.fmtShort(L.at1), pOn, TQ.fmtShort(P.death))) + '</div></div>';
       }
       h += '<ul class="sum-cov">';
       function covLi(label, total, lifeTxt, propTxt) {
         if (!total) return ''; // 兩邊都沒有此項保障 → 不顯示
         var src = TQ.covSource(on, lifeTxt, pOn, propTxt);
-        return '<li><span>' + TQ.esc(label) + '</span><span class="sum-amtcol"><b>' + TQ.esc(TQ.fmtYuan(total)) + '</b><small class="sum-br">' + TQ.esc(src ? '（' + src + '）' : '') + '</small></span></li>';
+        return '<li><span class="sum-lab">' + TQ.niceText(label) + '</span><span class="sum-amtcol"><b>' + TQ.esc(TQ.fmtYuan(total)) + '</b>' + (src ? '<small class="sum-br">' + TQ.niceText('（' + src + '）') + '</small>' : '') + '</span></li>';
       }
       h += covLi('海外突發 住院', c.hospital, (L.child ? 'OH1 ' : '') + TQ.fmtShort(L.hospital), TQ.fmtShort(P.hospital));
       h += covLi('海外突發 門診', c.outpatient, '每日最高 ' + TQ.fmtShort(L.outpatient), TQ.fmtShort(P.outpatient));
       h += covLi('海外突發 急診', c.er, '每日最高 ' + TQ.fmtShort(L.er), TQ.fmtShort(P.er));
       h += covLi('意外醫療', c.accidentMedical, L.child ? 'MRC ' + TQ.fmtShort(L.mrc) : TQ.fmtShort(L.mr), TQ.fmtShort(P.accidentMedical));
       h += '</ul>';
-      // 不便險精簡：前 4 項 + 其餘數（產險不投保 → 不顯示）
-      var items = pOn ? (plan.inconvenience || []).slice(0, single ? 99 : 4) : [];
+      // 不便險：全部列出（產險不投保 → 不顯示）；三欄用 subgrid 讓各區塊（不便險／保費列）水平對齊
+      function itemLi(it) {
+        return '<li><span class="sum-iname">' + TQ.niceText(it.name) + '</span><span class="sum-iamt">' + (TQ.niceText(it.amount) || '—') + '</span></li>';
+      }
+      var items = pOn ? (plan.inconvenience || []) : [];
+      h += '<div class="sum-blk sum-blk-inconv">';
       if (items.length) {
         h += '<div class="sum-sec">不便險</div><ul class="sum-items">';
-        items.forEach(function (it) {
-          h += '<li><span>' + TQ.esc(it.name) + '</span><span>' + TQ.esc(it.amount) + '</span></li>';
-        });
-        var more = (plan.inconvenience || []).length - items.length;
-        if (more > 0) h += '<li class="more">…另有 ' + more + ' 項不便險／詳見完整報價</li>';
+        items.forEach(function (it) { h += itemLi(it); });
         h += '</ul>';
       }
+      h += '</div>';
       if (single && pOn && (plan.others || []).length) {
-        h += '<div class="sum-sec">其他產險保障</div><ul class="sum-items">';
-        plan.others.forEach(function (it) { h += '<li><span>' + TQ.esc(it.name) + '</span><span>' + TQ.esc(it.amount) + '</span></li>'; });
-        h += '</ul>';
+        h += '<div class="sum-blk"><div class="sum-sec">其他產險保障</div><ul class="sum-items">';
+        plan.others.forEach(function (it) { h += itemLi(it); });
+        h += '</ul></div>';
       }
       var pp = TQ.premiumParts(c);
       h += pp.missing
