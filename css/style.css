@@ -167,8 +167,6 @@ body {
 /* 品牌列（客戶頁頁首）：大心 logo＋標語＋系統名稱 */
 .brand-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(230, 207, 154, .28); }
 .brand-logo { position: absolute; top: 24px; right: 24px; width: 160px; height: 160px; object-fit: contain; z-index: 1; }
-.hero { padding-right: 208px; }
-@media (max-width: 479px) { .brand-logo { top: 16px; right: 14px; width: 88px; height: 88px; } .hero { padding-right: 112px; } }
 .brand-text { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
 .brand-slogan { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #fff; opacity: .92; }
 .brand-title { font-size: 18px; font-weight: 800; color: var(--gold-2); letter-spacing: .02em; }
