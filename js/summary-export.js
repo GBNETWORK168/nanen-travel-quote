@@ -68,9 +68,7 @@
         h += '</ul></div>';
       }
       var pp = TQ.premiumParts(c);
-      h += pp.missing
-        ? '<div class="sum-prem">壽 ' + pp.life + ' ＋ 產 ' + pp.prop + '（人壽另計）</div>'
-        : '<div class="sum-prem">壽 ' + pp.life + ' ＋ 產 ' + pp.prop + ' ＝ <b>' + pp.total + '</b> 元</div>';
+      h += '<div class="sum-prem">' + TQ.premiumFormula(pp, { html: true, totalTag: 'b', missingNote: '（人壽另計）' }) + '</div>';
       h += '</section>';
     });
     h += '</div>';

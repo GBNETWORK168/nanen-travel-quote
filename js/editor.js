@@ -294,8 +294,8 @@
         plans: (q.plans || []).map(function (p, i) {
           var c = TQ.computePlan(p, q);
           return { name: p.name || ('方案' + (i + 1)),
-            life: !c.life.enabled ? '不投保' : (c.lifePremiumMissing ? '未填' : c.life.premium),
-            prop: c.prop.enabled ? c.prop.premium : '不投保',
+            life: !c.life.enabled ? null : (c.lifePremiumMissing ? '未填' : c.life.premium),
+            prop: c.prop.enabled ? c.prop.premium : null,
             total: c.lifePremiumMissing ? '未完成' : c.premium };
         })
       });
@@ -993,8 +993,15 @@
         '<span>門診 <b>' + TQ.fmtYuan(c.outpatient) + '</b></span>' +
         '<span>急診 <b>' + TQ.fmtYuan(c.er) + '</b></span>' +
         '<span>意外醫療 <b>' + TQ.fmtYuan(c.accidentMedical) + '</b></span>' +
-        (function () { var pp = TQ.premiumParts(c);
-          return '<span>保費 ' + (c.life.enabled ? lifeBadge : '') + '壽<b>' + pp.life + '</b>＋' + (c.prop.enabled ? propBadge : '') + '產<b>' + pp.prop + '</b>＝<b>' + pp.total + '</b>元</span>'; })();
+        (function () {
+          var pp = TQ.premiumParts(c), bits = [];
+          if (pp.lifeOn) bits.push((c.life.enabled ? lifeBadge : '') + '壽<b>' + pp.life + '</b>');
+          if (pp.propOn) bits.push((c.prop.enabled ? propBadge : '') + '產<b>' + pp.prop + '</b>');
+          if (!bits.length) return '<span>保費 —</span>';
+          if (pp.missing) return '<span>保費 ' + bits.join('＋') + (pp.lifeOn ? '（人壽保費另計）' : '') + '</span>';
+          if (bits.length === 1) return '<span>保費 ' + bits[0] + '元</span>';
+          return '<span>保費 ' + bits.join('＋') + '＝<b>' + pp.total + '</b>元</span>';
+        })();
     });
     document.getElementById('regionHint').textContent = isDomesticDest()
       ? '目的地為台灣國內地點，暫不自動判斷地區；請改填出國目的地'

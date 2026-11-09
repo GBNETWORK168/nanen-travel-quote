@@ -367,13 +367,41 @@
     var s = covSource(lifeOn, lifeTxt, propOn !== false, propTxt);
     return s ? '（' + s + '）' : '';
   }
-  /** 保費列文字（卡片／總表圖／編輯器共用）：不投保的一方寫「不投保」 */
+  /** 保費列文字（卡片／總表圖／編輯器共用）：只列有投保的一方，不寫「不投保」 */
   function premiumParts(c) {
-    var lifeTxt = !c.life.enabled ? '不投保'
+    var lifeOn = !!c.life.enabled, propOn = !!c.prop.enabled;
+    var lifeTxt = !lifeOn ? ''
       : (c.lifePremiumMissing ? (c.lifeOverCap ? 'AT1 超過年齡上限' : '需另行試算') : comma(c.life.premium));
-    var propTxt = c.prop.enabled ? comma(c.prop.premium) : '不投保';
+    var propTxt = propOn ? comma(c.prop.premium) : '';
     return { life: lifeTxt, prop: propTxt, total: comma(c.premium), missing: !!c.lifePremiumMissing,
-      lifeNum: !c.life.enabled || c.lifePremiumMissing ? null : c.life.premium, propNum: c.prop.enabled ? c.prop.premium : null };
+      lifeOn: lifeOn, propOn: propOn,
+      lifeNum: !lifeOn || c.lifePremiumMissing ? null : c.life.premium, propNum: propOn ? c.prop.premium : null };
+  }
+  /**
+   * 保費列顯示（卡片／總表／編輯預覽共用）。
+   * 單邊 →「產 1,234 元」／「壽 1,234 元」；雙邊 →「壽 X ＋ 產 Y ＝ Z 元」。
+   * opts: { html:bool, lifeBadge:str, propBadge:str, totalTag:str, missingNote:str }
+   *   totalTag 預設 'span.prem-total'（html）或 'b'；missingNote 預設「（人壽保費另計）」
+   */
+  function premiumFormula(pp, opts) {
+    opts = opts || {};
+    var html = !!opts.html;
+    var lb = opts.lifeBadge || '', pb = opts.propBadge || '';
+    function wrap(t) { return html ? ('<b>' + t + '</b>') : t; }
+    var bits = [];
+    if (pp.lifeOn) bits.push(lb + '壽 ' + wrap(pp.life));
+    if (pp.propOn) bits.push(pb + '產 ' + wrap(pp.prop));
+    var body = bits.join(' ＋ ');
+    if (!body) return '';
+    if (pp.missing) {
+      return body + (pp.lifeOn ? (opts.missingNote || (html ? '（人壽保費另計）' : '（人壽另計）')) : '');
+    }
+    // 單邊：直接顯示保費，不重複「＝ 總額」
+    if (bits.length === 1) return body + ' 元';
+    var tot = html
+      ? (opts.totalTag === 'b' ? ('<b>' + pp.total + '</b>') : ('<span class="prem-total">' + pp.total + '</span>'))
+      : pp.total;
+    return body + ' ＝ ' + tot + ' 元';
   }
   /** 方案一側都不投保 → 錯誤訊息（擋總表圖） */
   function planNothingInsured(plan) {
@@ -450,9 +478,7 @@
 
     var pp = premiumParts(c);
     h += '<footer class="premium"><div class="prem-label">保費</div>' +
-      (pp.missing
-        ? '<div class="prem-formula">壽 <b>' + pp.life + '</b> ＋ 產 <b>' + pp.prop + '</b>（人壽保費另計）</div></footer>'
-        : '<div class="prem-formula">壽 <b>' + pp.life + '</b> ＋ 產 <b>' + pp.prop + '</b> ＝ <span class="prem-total">' + pp.total + '</span> 元</div></footer>');
+      '<div class="prem-formula">' + premiumFormula(pp, { html: true }) + '</div></footer>';
     h += '</article>';
     return h;
   }
@@ -490,9 +516,6 @@
     var cardQ = isCardQuote(quote);
     var propNote = cardQ ? cardPropNote(quote) : '產險＝' + PROPERTY_PRODUCT + (quote.schengen ? '【計畫二・醫療加值／申根適用，海外突發疾病住院 150萬】' : '【計畫一・國外旅遊適用】');
     notes.push((anyLife ? '人壽＝' + LIFE_PRODUCT + (anyProp ? '；' : '') : '') + (anyProp ? propNote : '') + '。');
-    if (anyLife !== anyProp || (quote.plans || []).some(function (p) { return !(p.life && p.life.enabled) || (p.property && p.property.enabled === false); })) {
-      notes.push('保費列中「不投保」表示該方案未投保該險種（不含其保障與保費）。');
-    }
     if (cardQ && anyProp) {
       notes.push('產險保費來源：' + CARD_SOURCE + '；保障內容依富邦產險新快樂旅平卡 DM（115.04）國外商品組合。');
       var adn = cardAddonNoteItems(quote);
@@ -917,6 +940,6 @@
     isCardQuote: isCardQuote, renderNotes: renderNotes, displayTagline: displayTagline, schengenBadge: schengenBadge, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
     cardAddonQuote: cardAddonQuote, CARD_SOURCE: CARD_SOURCE,
     BRAND: BRAND, renderBrand: renderBrand, brandLogoReady: function () { return brandLogoReady; },
-    renderQuote: renderQuote, renderPlanCard: renderPlanCard, premiumParts: premiumParts, covSource: covSource, planNothingInsured: planNothingInsured, titleFor: titleFor, esc: esc, niceText: niceText
+    renderQuote: renderQuote, renderPlanCard: renderPlanCard, premiumParts: premiumParts, premiumFormula: premiumFormula, covSource: covSource, planNothingInsured: planNothingInsured, titleFor: titleFor, esc: esc, niceText: niceText
   };
 })(window);
