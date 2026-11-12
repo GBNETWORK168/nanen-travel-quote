@@ -754,7 +754,9 @@
       if (k === 'extraNotesText') v = (Q.extraNotes || []).join('\n');
       else if (k === 'propertyProductCard') v = Q.propertyProduct === 'card';
       else if (mSelF) v = selValue(Q.plans[Number(mSelF[1])], mSelF[2]);
+      else if (k === 'birthdayCal') v = Q.birthdayCal || 'roc';
       else v = getPath(Q, k);
+      if (k === 'birthday') el.placeholder = (Q.birthdayCal === 'ad') ? '西元 1982/08/07 或 19820807' : '民國 71/08/07 或 710807';
       if (el.type === 'checkbox') el.checked = !!v;
       else el.value = (v === null || v === undefined) ? '' : v;
     });
@@ -852,7 +854,8 @@
 
     // 改關鍵欄位 → 恢復自動
     if (k === 'age' && Q.birthday) { Q.birthday = ''; var bdEl = form.querySelector('[data-k="birthday"]'); if (bdEl) bdEl.value = ''; applyBirthdayAge(); }
-    if (k === 'birthday' || ((k === 'startDate') && Q.birthday)) { if (applyBirthdayAge()) { skipAutoOnce.life = {}; skipAutoOnce.prop = {}; } }
+    if (k === 'birthdayCal') { var bdI = form.querySelector('[data-k="birthday"]'); if (bdI) bdI.placeholder = (v === 'ad') ? '西元 1982/08/07 或 19820807' : '民國 71/08/07 或 710807'; }
+    if (k === 'birthday' || ((k === 'startDate' || k === 'birthdayCal') && Q.birthday)) { if (applyBirthdayAge()) { skipAutoOnce.life = {}; skipAutoOnce.prop = {}; } }
     if ((k === 'age' || k === 'birthday') && TQ.isCardQuote(Q)) {
       // 旅平卡：手選組合不涵蓋新年齡（含成人↔兒童）→ 回預設組合
       var aiC2 = TQ.ageInfo(Q.age);
@@ -1102,7 +1105,11 @@
     if ((mm = /^(\d{2,4})[\/\-.年](\d{1,2})[\/\-.月](\d{1,2})日?$/.exec(t))) { y = +mm[1]; m = +mm[2]; d = +mm[3]; }
     else if ((mm = /^(\d{2,4})(\d{2})(\d{2})$/.exec(t))) { y = +mm[1]; m = +mm[2]; d = +mm[3]; }
     else return null;
-    if (y < 1000) y += 1911; // 民國
+    if (Q.birthdayCal === 'ad') {
+      // 西元：四位數年直接用；兩位數年（如 820807）依當前年份推世紀
+      if (y < 100) { var cy = new Date().getFullYear() % 100; y += (y > cy ? 1900 : 2000); }
+      else if (y < 1000) return null;
+    } else if (y < 1000) y += 1911; // 民國（四位數年仍視為西元）
     var dt = new Date(y, m - 1, d);
     if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
     return dt;
@@ -1119,7 +1126,7 @@
     var hint = document.getElementById('bdayHint');
     if (!Q.birthday) { if (hint) { hint.textContent = '填生日自動帶入足歲（以出發日計，未填出發日以今天計）；改年齡會清除生日'; hint.style.color = ''; } return false; }
     var a = ageFromBirthday(Q.birthday);
-    if (a == null) { if (hint) { hint.textContent = '⚠ 生日格式無法辨識（例：71/08/07、710807、1982-08-07）'; hint.style.color = '#c0392b'; } return false; }
+    if (a == null) { if (hint) { hint.textContent = (Q.birthdayCal === 'ad' ? '⚠ 西元生日格式無法辨識（例：1982/08/07、19820807）' : '⚠ 民國生日格式無法辨識（例：71/08/07、710807）'); hint.style.color = '#c0392b'; } return false; }
     Q.age = a;
     var inp = form.querySelector('[data-k="age"]'); if (inp) inp.value = String(a);
     var ai = TQ.ageInfo(a);
