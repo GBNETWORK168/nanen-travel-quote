@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#00509E">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>國旅報價系統｜新快樂旅綜＋國旅限定版 115.10</title>
+<link rel="icon" type="image/png" href="../img/favicon.png">
+<link rel="apple-touch-icon" href="../img/favicon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <img src="../img/logo.png" width="40" height="40" alt="南恩通訊處">
+  <div>
+    <h1>國旅報價系統</h1>
+    <div class="sub">新快樂旅綜＋　國旅限定版 115.10</div>
+  </div>
+  <span class="badge">內部使用</span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>保障期間</h2>
+    <div class="seg" role="tablist">
+      <button type="button" id="modeDays" class="on">輸入天數</button>
+      <button type="button" id="modeDates">起迄日期</button>
+    </div>
+
+    <div id="paneDays">
+      <div class="field" style="max-width:12em">
+        <label for="daysInput">投保天數</label>
+        <input id="daysInput" inputmode="numeric" placeholder="例如 3" autocomplete="off">
+      </div>
+    </div>
+
+    <div id="paneDates" style="display:none">
+      <div class="seg" style="max-width:16em">
+        <button type="button" id="calRoc" class="on">民國</button>
+        <button type="button" id="calAd">西元</button>
+      </div>
+      <div class="dategrid">
+        <div class="field">
+          <label>起日</label>
+          <div class="ymd">
+            <input id="yStart" class="year" inputmode="numeric" autocomplete="off">
+            <span id="yearLabelStart">年（民國）</span>
+            <input id="mStart" inputmode="numeric" autocomplete="off">
+            <span>月</span>
+            <input id="dStart" inputmode="numeric" autocomplete="off">
+            <span>日</span>
+          </div>
+          <div class="timewrap" style="margin-top:6px">
+            <input id="tStart" type="time">
+            <span class="hint" style="margin:0">時刻選填</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>迄日</label>
+          <div class="ymd">
+            <input id="yEnd" class="year" inputmode="numeric" autocomplete="off">
+            <span id="yearLabelEnd">年（民國）</span>
+            <input id="mEnd" inputmode="numeric" autocomplete="off">
+            <span>月</span>
+            <input id="dEnd" inputmode="numeric" autocomplete="off">
+            <span>日</span>
+          </div>
+          <div class="timewrap" style="margin-top:6px">
+            <input id="tEnd" type="time">
+            <span class="hint" style="margin:0">時刻選填</span>
+          </div>
+        </div>
+      </div>
+      <p class="hint">只填日期：起日、迄日都算進去（例如 11/16～11/19＝4 天）。起迄都填時刻：按實際時數，未滿一日以一日計（例如 11/16 01:00～11/19 01:00＝72 小時＝3 天）。</p>
+    </div>
+    <div id="dayHint"></div>
+  </section>
+
+  <section class="card">
+    <h2>被保險人</h2>
+    <div id="people"></div>
+    <div class="btn-row">
+      <button type="button" class="btn" id="btnAdd">＋ 新增被保險人（可加總）</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>報價文字</h2>
+    <textarea id="quotePreview" readonly aria-label="報價文字"></textarea>
+    <div class="btn-row">
+      <button type="button" class="btn btn-gold" id="btnCopy2">一鍵複製報價文字</button>
+    </div>
+  </section>
+
+  <details class="card">
+    <summary>計畫保障對照（DM 刊印）</summary>
+    <div style="overflow:auto;margin-top:10px">
+      <table class="cov-table">
+        <thead>
+          <tr>
+            <th class="l">項目</th>
+            <th>兒童</th><th>計畫一</th><th>計畫二</th><th>計畫三</th><th>計畫四</th><th>計畫五</th><th>計畫六</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="l">可投保年齡</td><td>未滿15足歲</td><td colspan="2">15足歲～79歲</td><td>15足歲～74歲</td><td>18足歲～69歲</td><td>18足歲～74歲</td><td>18足歲～69歲</td></tr>
+          <tr><td class="l">身故及失能</td><td>—</td><td>200萬</td><td>300萬</td><td>500萬</td><td>1,000萬</td><td>500萬</td><td>1,000萬</td></tr>
+          <tr><td class="l">傷害醫療（保期內最高）</td><td>10萬</td><td>20萬</td><td>30萬</td><td>50萬</td><td>100萬</td><td>50萬</td><td>100萬</td></tr>
+          <tr><td class="l">緊急救援（保期內最高）</td><td colspan="3">50萬</td><td colspan="2">50萬</td><td colspan="2">50萬</td></tr>
+          <tr><td class="l">個人賠償責任（自負額2,500元）</td><td colspan="3">50萬</td><td colspan="2">50萬</td><td colspan="2">50萬</td></tr>
+          <tr><td class="l">居家火災臨時住宿（定額）</td><td colspan="3">—</td><td colspan="2">1萬／次</td><td colspan="2">1萬／次</td></tr>
+          <tr><td class="l">居家竊盜損失（定額）</td><td colspan="3">—</td><td colspan="2">1萬／次</td><td colspan="2">1萬／次</td></tr>
+          <tr><td class="l">親友前往處理費用</td><td colspan="3">1萬</td><td colspan="2">1.5萬</td><td colspan="2">1.5萬</td></tr>
+          <tr><td class="l">食品中毒（定額）</td><td colspan="3">3千／次</td><td colspan="2">6千／次</td><td colspan="2">6千／次</td></tr>
+          <tr><td class="l">一至三級失能居家照護</td><td colspan="3">5萬</td><td colspan="2">10萬</td><td colspan="2">10萬</td></tr>
+          <tr><td class="l">交通費用補償（保期內一次）</td><td colspan="5">—</td><td colspan="2">3千／次</td></tr>
+          <tr><td class="l">駕駛人車碰車車體損失責任</td><td colspan="5">—</td><td colspan="2">10萬</td></tr>
+          <tr><td class="l">駕駛人第三人傷害</td><td colspan="5">—</td><td colspan="2">100萬</td></tr>
+          <tr><td class="l">駕駛人第三人財損</td><td colspan="5">—</td><td colspan="2">10萬</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">兒童計畫無身故及失能保額，亦無意外死亡喪葬費用保險金。機車車種不包含大型重型機車。計畫五、六含租車自駕相關保障。</p>
+  </details>
+
+  <details class="card">
+    <summary>1～20 日保費表（每人／新台幣）</summary>
+    <div style="overflow:auto;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th>天數</th><th>兒童</th><th>計畫一</th><th>計畫二</th><th>計畫三</th><th>計畫四</th><th>計畫五</th><th>計畫六</th>
+          </tr>
+        </thead>
+        <tbody id="rateBody"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <p class="foot">
+    費率來源：富邦產險《新快樂旅綜＋　國旅限定版》115.10版 DM 刊印數字，僅列 1～20 日；其他天數請向業務人員洽詢，不內插。<br>
+    DM 註明：「保費計算若有誤差值，以本公司系統為主。」本頁不能送審、出單或付款。<br>
+    國外旅平險三方案工具：<a href="../editor.html">旅平險組合方案試算</a>
+  </p>
+</main>
+
+<div class="totalbar">
+  <div>
+    <div class="lab">合計保費</div>
+    <div class="sum" id="sumText">—</div>
+  </div>
+  <button type="button" class="btn btn-gold" id="btnCopy">複製報價文字</button>
+</div>
+
+<script src="rates.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
