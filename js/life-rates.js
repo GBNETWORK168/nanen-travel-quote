@@ -2,6 +2,10 @@
  * 範圍：agency／asia14／18-65／OAA開／OH1=MR=AT1×10%／AT1 100～2000（每100）×天數 1～30＝600 筆
  * 查無完全相符組合時不得自動填入（禁止內插）。完整 JSON：data/life_rates_gpta.json
  * 抓表時間：2026-10-05T22:24:30+08:00
+ *
+ * OAA：表內皆為「含 OAA」費率。不含 OAA（亞洲14國取消勾選，或國外其他地區）
+ * ＝ 含 OAA 費率 − OAA_BY_DAYS[天數]。差額只跟天數有關，與 AT1／年齡帶無關。
+ * 資料來源：富邦「旅平險保費簡易查詢」（旅行社／快易保），見 /workspace/travel_quote/oaa_check/oaa_scan.csv
  */
 (function (global) {
   'use strict';
@@ -16,6 +20,15 @@
   var META_U15 = {"v": 1, "product": "富邦人壽 兒童傷害醫療旅行平安保險（MRC）＋OH1＋OAA", "rateType": "agency（旅行社／快易保）", "nationality": "本國人", "region": "asia14（國外亞洲14國）", "ageBand": "under15（未滿15足歲）", "mrcWan": 60, "oh1Wan": "60 或 120", "oaa": true, "days": "1～30", "count": 60, "source": "GPTA 系統試算", "scrapedAt": "2026-10-06", "note": "無 AT1、無 MR；僅精確相符可自動帶入，禁止內插。"};
   var RATES_U15 = [{"days":1,"oh1Wan":60,"premium":358},{"days":2,"oh1Wan":60,"premium":385},{"days":3,"oh1Wan":60,"premium":423},{"days":4,"oh1Wan":60,"premium":547},{"days":5,"oh1Wan":60,"premium":675},{"days":6,"oh1Wan":60,"premium":734},{"days":7,"oh1Wan":60,"premium":778},{"days":8,"oh1Wan":60,"premium":811},{"days":9,"oh1Wan":60,"premium":847},{"days":10,"oh1Wan":60,"premium":885},{"days":11,"oh1Wan":60,"premium":917},{"days":12,"oh1Wan":60,"premium":953},{"days":13,"oh1Wan":60,"premium":991},{"days":14,"oh1Wan":60,"premium":1027},{"days":15,"oh1Wan":60,"premium":1061},{"days":16,"oh1Wan":60,"premium":1098},{"days":17,"oh1Wan":60,"premium":1132},{"days":18,"oh1Wan":60,"premium":1166},{"days":19,"oh1Wan":60,"premium":1202},{"days":20,"oh1Wan":60,"premium":1238},{"days":21,"oh1Wan":60,"premium":1272},{"days":22,"oh1Wan":60,"premium":1296},{"days":23,"oh1Wan":60,"premium":1320},{"days":24,"oh1Wan":60,"premium":1345},{"days":25,"oh1Wan":60,"premium":1369},{"days":26,"oh1Wan":60,"premium":1394},{"days":27,"oh1Wan":60,"premium":1416},{"days":28,"oh1Wan":60,"premium":1441},{"days":29,"oh1Wan":60,"premium":1467},{"days":30,"oh1Wan":60,"premium":1490},{"days":1,"oh1Wan":120,"premium":532},{"days":2,"oh1Wan":120,"premium":575},{"days":3,"oh1Wan":120,"premium":630},{"days":4,"oh1Wan":120,"premium":817},{"days":5,"oh1Wan":120,"premium":1006},{"days":6,"oh1Wan":120,"premium":1091},{"days":7,"oh1Wan":120,"premium":1159},{"days":8,"oh1Wan":120,"premium":1208},{"days":9,"oh1Wan":120,"premium":1261},{"days":10,"oh1Wan":120,"premium":1316},{"days":11,"oh1Wan":120,"premium":1367},{"days":12,"oh1Wan":120,"premium":1420},{"days":13,"oh1Wan":120,"premium":1474},{"days":14,"oh1Wan":120,"premium":1526},{"days":15,"oh1Wan":120,"premium":1578},{"days":16,"oh1Wan":120,"premium":1632},{"days":17,"oh1Wan":120,"premium":1683},{"days":18,"oh1Wan":120,"premium":1731},{"days":19,"oh1Wan":120,"premium":1785},{"days":20,"oh1Wan":120,"premium":1838},{"days":21,"oh1Wan":120,"premium":1890},{"days":22,"oh1Wan":120,"premium":1926},{"days":23,"oh1Wan":120,"premium":1964},{"days":24,"oh1Wan":120,"premium":1999},{"days":25,"oh1Wan":120,"premium":2034},{"days":26,"oh1Wan":120,"premium":2071},{"days":27,"oh1Wan":120,"premium":2106},{"days":28,"oh1Wan":120,"premium":2143},{"days":29,"oh1Wan":120,"premium":2179},{"days":30,"oh1Wan":120,"premium":2215}];
   /*U15-END*/
+
+  /* OAA 費用（元）只跟投保天數有關：1～30 天。成人與未滿15歲同一套。
+   * 來源：旅平險保費簡易查詢，同一組合「投保 OAA − 不投保 OAA」；並已交叉核對 oaa_scan.csv。 */
+  var OAA_BY_DAYS = {1:141,2:147,3:165,4:212,5:262,6:290,7:302,8:314,9:328,10:344,11:357,12:372,13:388,14:402,15:415,16:430,17:443,18:456,19:471,20:485,21:499,22:508,23:518,24:527,25:537,26:546,27:554,28:564,29:574,30:583};
+  function oaaFee(days) {
+    var d = Number(days);
+    return (d >= 1 && d <= 30 && OAA_BY_DAYS[d] != null) ? OAA_BY_DAYS[d] : null;
+  }
+
 
   var ASIA14 = ['中國', '大陸', '香港', '澳門', '日本', '韓國', '南韓', '越南', '新加坡', '菲律賓', '印尼', '馬來西亞', '緬甸', '泰國', '寮國', '柬埔寨', '帛琉', '馬爾地夫', '亞洲14', '亞洲十四'];
 
@@ -72,30 +85,40 @@
     var days = Number(quote.days);
     var rateType = quote.lifeRateType || 'agency';
     var region = quote.lifeRegion || guessLifeRegion(quote.destination);
-    var oaa = !!life.oaa;
-    // 國外其他（歐洲等）：保費與亞洲14國同表（業務確認），僅保障倍數不同；OAA 僅限亞洲14國 → 以同表（OAA 開）費率計
     var otherRegion = region === 'other';
-    if (otherRegion) { region = 'asia14'; oaa = true; }
-    var regionTag = otherRegion ? '・國外其他同表' : '';
+    // 亞洲14國以外沒有 OAA 可投保；14國則依方案勾選（預設投保）
+    var wantOaa = !otherRegion && !!life.oaa;
+    var regionTag = otherRegion ? '・國外其他（同表、不含 OAA）' : (wantOaa ? '＋OAA' : '・不含 OAA');
     // 年齡（足歲）優先；舊稿無年齡才用 ageBand
     var ai = (global.TQ && TQ.ageInfo) ? TQ.ageInfo(quote.age) : { set: false, valid: false };
     if (ai.set && !ai.valid) return { found: false, tip: ai.error };
     var ageBand = ai.valid ? ai.band : (quote.ageBand || '18-65');
 
-    // 未滿15足歲：MRC 60萬＋OH1 60/120萬＋OAA（無 AT1／MR），查 RATES_U15
+    function withOaaAdjustment(basePremium, source, tipCore) {
+      if (wantOaa) {
+        return { found: true, premium: basePremium, source: source, oaa: true, oaaFee: 0, tip: '自動：' + basePremium.toLocaleString('en-US') + ' 元（' + tipCore + regionTag + '）' };
+      }
+      var fee = oaaFee(days);
+      if (fee == null) return { found: false, tip: '找不到 ' + days + ' 天的 OAA 費用（僅 1～30 天）；請用 GPTA／簡易查詢後手填' };
+      var prem = basePremium - fee;
+      return {
+        found: true, premium: prem, source: source, oaa: false, oaaFee: fee,
+        tip: '自動：' + prem.toLocaleString('en-US') + ' 元（' + tipCore + regionTag + '，已扣除 OAA ' + fee.toLocaleString('en-US') + '元）'
+      };
+    }
+
+    // 未滿15足歲：MRC 60萬＋OH1 60/120萬（無 AT1／MR），查 RATES_U15（表為含 OAA）
     if (ageBand === 'under15') {
       var oh = (global.TQ && TQ.childOh1Wan) ? TQ.childOh1Wan(life) : 60;
-      var cover15 = '未滿15歲離線表範圍：旅行社／快易保 × 亞洲14國 × MRC 60萬 × OH1 60／120萬 × OAA投保 × 1～30天';
+      var cover15 = '未滿15歲離線表範圍：旅行社／快易保 × MRC 60萬 × OH1 60／120萬 × 1～30天（含 OAA 表；取消 OAA 或國外其他則扣除 OAA 天數費用）';
       if (!isFinite(days) || days <= 0) return { found: false, tip: '請先填投保天數' };
       if (rateType !== 'agency') return { found: false, tip: '尚無此費率類型（' + rateType + '）。' + cover15 + '；請用 GPTA 試算後手填' };
-      if (region !== 'asia14') return { found: false, tip: '尚無「' + region + '」地區未滿15歲費率（OAA 亦僅限亞洲14國）。' + cover15 + '；請用 GPTA 試算後手填' };
-      if (!oaa) return { found: false, tip: '尚無「OAA 不投保」未滿15歲費率。' + cover15 + '；請用 GPTA 試算後手填' };
       if (days > 30) return { found: false, tip: '離線表僅到 30 天，目前 ' + days + ' 天請用 GPTA 試算後手填' };
       for (var u = 0; u < RATES_U15.length; u++) {
         var ru = RATES_U15[u];
         if (Number(ru.days) === days && Number(ru.oh1Wan) === oh) {
-          return { found: true, premium: ru.premium, source: META_U15.source,
-            tip: '自動：' + ru.premium.toLocaleString('en-US') + ' 元（GPTA 未滿15歲／' + days + '天／MRC 60萬＋OH1 ' + oh + '萬' + (otherRegion ? '' : '＋OAA') + regionTag + '）' };
+          return withOaaAdjustment(ru.premium, META_U15.source,
+            'GPTA 未滿15歲／' + days + '天／MRC 60萬＋OH1 ' + oh + '萬');
         }
       }
       return { found: false, tip: '尚無此組合費率（未滿15歲／' + days + '天／OH1 ' + oh + '萬）；請用 GPTA 試算後手填' };
@@ -114,22 +137,15 @@
       return { found: false, tip: '請先填投保天數' };
     }
 
-    // 明確提示目前離線表的覆蓋範圍
-    var coverTip = '離線表範圍：旅行社／快易保 × 亞洲14國 × 15歲以上（66歲以上同 18～65 費率，僅 AT1 上限不同）× OAA投保 × AT1 100～2000萬（每100；15～17歲上限600）× 1～30天';
+    var coverTip = '離線表範圍：旅行社／快易保 × 15歲以上（66歲以上同 18～65 費率，僅 AT1 上限不同）× AT1 100～2000萬（每100；15～17歲上限600）× 1～30天；表為亞洲14國含 OAA，取消 OAA 或國外其他則扣除 OAA 天數費用';
     if (rateType !== 'agency') {
       return { found: false, tip: '尚無此費率類型（' + rateType + '）。' + coverTip + '；請用 GPTA 試算後手填' };
     }
-    if (region !== 'asia14') {
-      return { found: false, tip: '尚無「' + region + '」地區費率（OAA 亦僅限亞洲14國）。' + coverTip + '；請用 GPTA 試算後手填' };
-    }
     // 15～17歲 費率與 18～65 相同（GPTA 2026-10-06 抽查 500/5天=850、500/10天=1,119、300/5天=617）
     // 66 歲以上費率亦同 18～65（僅 AT1 上限不同，上方已檢查）
-    var adultBand = ai.valid ? ai.lifeRates === 'adult' : (ageBand === '18-65' || ageBand === '15-17');
+    var adultBand = ai.valid ? ai.lifeRates === 'adult' : (ageBand === '18-65' || ageBand === '15-17' || ageBand === '66-70' || ageBand === '71-75' || ageBand === '76-80' || ageBand === '81-100');
     if (!adultBand) {
       return { found: false, tip: '尚無年齡帶「' + ageBand + '」費率。' + coverTip + '；請用 GPTA 試算後手填' };
-    }
-    if (!oaa) {
-      return { found: false, tip: '尚無「OAA 不投保」費率。' + coverTip + '；請用 GPTA 試算後手填' };
     }
     if (days > 30) {
       return { found: false, tip: '離線表僅到 30 天，目前 ' + days + ' 天請用 GPTA 試算後手填' };
@@ -141,13 +157,9 @@
       if (Number(r.at1Wan) !== at1) continue;
       if (Number(r.oh1Wan) !== Number(em.oh1)) continue;
       if (Number(r.mrWan) !== Number(em.mr)) continue;
-      if (!!r.oaa !== oaa) continue;
-      return {
-        found: true,
-        premium: r.premium,
-        source: META.source,
-        tip: '自動：' + r.premium.toLocaleString('en-US') + ' 元（GPTA 離線表／' + days + '天／AT1 ' + at1 + '萬' + regionTag + '）'
-      };
+      // 表內皆為含 OAA；不含 OAA 在 withOaaAdjustment 扣除
+      if (!r.oaa) continue;
+      return withOaaAdjustment(r.premium, META.source, 'GPTA 離線表／' + days + '天／AT1 ' + at1 + '萬');
     }
     return {
       found: false,
@@ -158,7 +170,7 @@
   function listKnownCombos() {
     return [
       '共 ' + RATES.length + ' 筆：' + META.at1Wan + ' × ' + META.days,
-      '條件：' + META.rateType + '／' + META.region + '／' + META.ageBand + '／OAA開／' + META.oh1MrRule,
+      '條件：' + META.rateType + '／亞洲14國含 OAA 表；國外其他或不含 OAA＝表價 − OAA 天數費用／' + META.oh1MrRule,
       '來源：' + META.source + ' @ ' + META.scrapedAt
     ];
   }
@@ -170,6 +182,8 @@
     ratesU15: RATES_U15,
     guessLifeRegion: guessLifeRegion,
     lookupLifePremium: lookupLifePremium,
+    oaaFee: oaaFee,
+    OAA_BY_DAYS: OAA_BY_DAYS,
     listKnownCombos: listKnownCombos,
     ASIA14: ASIA14,
     ASIA14_PLACES: ASIA14_PLACES

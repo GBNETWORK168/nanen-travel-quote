@@ -342,7 +342,7 @@
       msg = '⚠ ' + ai.error;
     } else {
       if (ai.child) {
-        note = '未滿15歲人壽主約為兒童傷害醫療旅平險 MRC 60萬，不提供AT1（OH1 可選 60／120萬＋OAA）；產險改新快樂旅綜+ 兒童方案（DM：未滿15足歲無意外死亡喪葬費用保險金）';
+        note = '未滿15歲人壽主約為兒童傷害醫療旅平險 MRC 60萬，不提供AT1（OH1 可選 60／120萬；OAA 僅限亞洲14國、預設投保）；產險改新快樂旅綜+ 兒童方案（DM：未滿15足歲無意外死亡喪葬費用保險金）';
       } else {
         note = 'GPTA 年齡帶：' + ai.label + '｜人壽 AT1 上限 ' + ai.at1Max + ' 萬' +
           '｜產險可選：' + propertyDeathOptionsFor(ai).map(function (x) { return x + '萬'; }).join('／');
@@ -655,7 +655,7 @@
     if (child) {
       h += selectField('人壽（兒童傷害醫療 MRC 60萬＋OH1）', b + '_lifeSel',
         ZERO.concat(TQ.CHILD_OH1_OPTIONS.map(function (v) { return { value: v, label: 'MRC 60萬＋OH1 ' + v + ' 萬' + (v === 60 ? '（預設）' : '（醫療加值）') }; })), {
-        hint: hasLife ? '未滿15歲人壽主約為兒童傷害醫療旅平險 MRC 60萬，不提供AT1；無 MR；OAA 同成人' : '人壽不投保（保費 0，卡片不列人壽保障）', auto: true
+        hint: hasLife ? '未滿15歲人壽主約為兒童傷害醫療旅平險 MRC 60萬，不提供AT1；無 MR；OAA 僅限亞洲14國、預設投保' : '人壽不投保（保費 0，卡片不列人壽保障）', auto: true
       });
     } else {
       var cap = ai.valid ? ai.at1Max : 2000;
@@ -694,6 +694,13 @@
     h += '</div>';
     h += '<p class="hint" data-life-prem-tip="' + i + '"></p>';
     h += '<p class="hint" data-prop-prem-tip="' + i + '"></p>';
+    if (hasLife) {
+      if (Q.lifeRegion === 'asia14') {
+        h += '<label class="check oaa-check" style="margin-top:8px"><input type="checkbox" data-k="' + b + 'life.oaa"> OAA（海外醫療專機運送）</label>';
+      } else {
+        h += '<p class="hint oaa-hint" style="margin-top:6px">OAA 僅限亞洲14國</p>';
+      }
+    }
 
     h += '<details class="prop-advanced" style="margin-top:10px"><summary>進階（名稱／附約／細項／手改保費）</summary>';
     h += '<div class="grid g2" style="margin-top:8px">' +
@@ -708,7 +715,6 @@
         field('MR（萬）', b + 'life.mrWan', { hint: '空白＝AT1×10%', auto: true })) +
       field('人壽保費（元）', b + 'life.premium', { hint: '可手改', auto: true }) +
       '</div>';
-    h += '<label class="check" style="margin-top:8px"><input type="checkbox" data-k="' + b + 'life.oaa"> OAA（限亞洲14國）</label>';
     h += '<div class="grid g3" style="margin-top:8px">' +
       field('人壽住院（元）', b + 'life.hospitalYuan', { hint: '空白＝自動', auto: true }) +
       field('人壽門診每日（元）', b + 'life.outpatientYuan', { hint: '空白＝自動', auto: true }) +
@@ -871,6 +877,9 @@
         if (abSel) abSel.value = aiR.band;
       }
     }
+    if (k === 'lifeRegion') {
+      Q.plans.forEach(function (p) { if (p.life && p.life.enabled) p.life.oaa = (v === 'asia14'); });
+    }
     if (k === 'age' || k === 'startDate' || k === 'endDate' || k === 'ageBand' || k === 'lifeRegion' || k === 'lifeRateType' || k === 'destination' || k === 'schengen') {
       skipAutoOnce.life = {}; skipAutoOnce.prop = {};
     }
@@ -928,7 +937,7 @@
         if (window.LIFE_RATES) {
           var lr = LIFE_RATES.guessLifeRegion(Q.destination);
           Q.lifeRegion = lr;
-          // OAA 僅限亞洲14國（原邏輯）：依目的地地區開／關
+          // OAA 僅限亞洲14國：非14國一律關閉；改回14國則預設勾選
           Q.plans.forEach(function (p) { if (p.life && p.life.enabled) p.life.oaa = (lr === 'asia14'); });
           var sel = form.querySelector('[data-k="lifeRegion"]');
           if (sel) sel.value = lr;
@@ -1017,7 +1026,7 @@
     if (!Q.destination) add('warn', '尚未填寫目的地。');
     quoteBlockers().forEach(function (m) { add('err', m + '（目前無法下載三方案總表圖）'); });
     var aiC = TQ.ageInfo(Q.age);
-    if (aiC.valid && aiC.child) add('ok', '未滿15足歲：人壽為兒童傷害醫療旅平險 MRC 60萬＋OH1＋OAA（無 AT1／MR）；產險為兒童方案。');
+    if (aiC.valid && aiC.child) add('ok', '未滿15足歲：人壽為兒童傷害醫療旅平險 MRC 60萬＋OH1' + (Q.lifeRegion === 'asia14' ? '＋OAA（可取消）' : '（OAA 僅限亞洲14國）') + '（無 AT1／MR）；產險為兒童方案。');
     var dsC = dateState();
     if (dsC.days > 30) add('warn', '共 ' + dsC.days + ' 天：自動費率僅涵蓋人壽 1～30 天、產險 2～30 天（兒童方案 2～10 天），超出範圍的保費請以 GPTA／產險試算後手填。');
     Q.plans.forEach(function (p) {
@@ -1176,7 +1185,7 @@
     if (t.hasAttribute('data-k') && (t.type === 'checkbox' || t.tagName === 'SELECT')) {
       readInput(t);
       var kc = t.getAttribute('data-k');
-      if (kc === 'schengen') { buildPlanUI(); return; }
+      if (kc === 'schengen' || kc === 'lifeRegion') { buildPlanUI(); update(); return; }
       if (kc === 'propertyProductCard' || /^cardAddons\./.test(kc)) { skipAutoOnce.prop = {}; buildPlanUI(); update(); return; }
       if (/^plans\.\d+\.(_lifeSel|_propSel|life\.enabled)$/.test(kc)) { buildPlanUI(); update(); return; }
       update();

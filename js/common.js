@@ -199,6 +199,18 @@
     return Number(life && life.childOh1Wan) === 120 ? 120 : 60;
   }
 
+  /** 人壽旅遊地區：亞洲14國才可附 OAA。優先用報價上的 lifeRegion，否則猜目的地。 */
+  function lifeRegionOf(quote) {
+    if (quote && (quote.lifeRegion === 'asia14' || quote.lifeRegion === 'other')) return quote.lifeRegion;
+    if (global.LIFE_RATES && LIFE_RATES.guessLifeRegion) return LIFE_RATES.guessLifeRegion(quote && quote.destination);
+    return quote && quote.lifeRegion ? quote.lifeRegion : '';
+  }
+  /** 實際是否含 OAA：非亞洲14國一律不含，不論資料裡的勾選。 */
+  function effectiveOaa(quote, life) {
+    if (!(life && life.oaa)) return false;
+    return lifeRegionOf(quote) !== 'other';
+  }
+
   /** 計算單一方案所有顯示用數值（單位：元） */
   function computePlan(plan, quote) {
     var life = plan.life || {};
@@ -207,7 +219,7 @@
     var child = isChildQuote(quote);
     var L = { enabled: !!life.enabled, child: false, mrc: 0 };
     if (L.enabled && child) {
-      // 未滿15足歲：無 AT1、無 MR；主約 MRC 60萬（傷害醫療）＋OH1 60/120萬＋OAA
+      // 未滿15足歲：無 AT1、無 MR；主約 MRC 60萬（傷害醫療）＋OH1 60/120萬；OAA 僅亞洲14國可投保
       L.child = true;
       L.at1 = 0; L.mr = 0;
       L.mrc = CHILD_MRC_WAN * 10000;
@@ -215,7 +227,7 @@
       L.hospital = isSet(life.hospitalYuan) ? num(life.hospitalYuan) : L.oh1 * LIFE_OH1_RATIO.hospital * region;
       L.outpatient = isSet(life.outpatientYuan) ? num(life.outpatientYuan) : L.oh1 * LIFE_OH1_RATIO.outpatient * region;
       L.er = isSet(life.erYuan) ? num(life.erYuan) : L.oh1 * LIFE_OH1_RATIO.er * region;
-      L.oaa = !!life.oaa;
+      L.oaa = effectiveOaa(quote, life);
       L.premium = num(life.premium);
     } else if (L.enabled) {
       L.at1 = num(life.at1Wan) * 10000;
@@ -224,7 +236,7 @@
       L.hospital = isSet(life.hospitalYuan) ? num(life.hospitalYuan) : L.oh1 * LIFE_OH1_RATIO.hospital * region;
       L.outpatient = isSet(life.outpatientYuan) ? num(life.outpatientYuan) : L.oh1 * LIFE_OH1_RATIO.outpatient * region;
       L.er = isSet(life.erYuan) ? num(life.erYuan) : L.oh1 * LIFE_OH1_RATIO.er * region;
-      L.oaa = !!life.oaa;
+      L.oaa = effectiveOaa(quote, life);
       L.premium = num(life.premium);
     } else {
       L.at1 = L.oh1 = L.mr = L.hospital = L.outpatient = L.er = L.premium = 0; L.oaa = false;
@@ -517,7 +529,12 @@
     }
     var childQ = isChildQuote(quote);
     if (childQ) {
-      if (anyLife) notes.push('未滿15足歲：人壽主約為兒童傷害醫療旅行平安保險 MRC 60萬（傷害醫療每一事故最高），不提供 AT1 意外身故；另含海外突發疾病 OH1 及 OAA。');
+      if (anyLife) {
+        var lifePlans = (quote.plans || []).filter(function (p) { return p.life && p.life.enabled; });
+        var oaaN = lifePlans.filter(function (p) { return effectiveOaa(quote, p.life); }).length;
+        var oaaTxt = oaaN === 0 ? '另含海外突發疾病 OH1' : (oaaN === lifePlans.length ? '另含海外突發疾病 OH1 及 OAA' : '另含海外突發疾病 OH1；OAA 僅部分方案有投保');
+        notes.push('未滿15足歲：人壽主約為兒童傷害醫療旅行平安保險 MRC 60萬（傷害醫療每一事故最高），不提供 AT1 意外身故；' + oaaTxt + '。');
+      }
       if (anyProp) notes.push(cardQ ? '產險：未滿15足歲適用新快樂旅平卡兒童組合（無身故及失能保障）。' : '產險：未滿15足歲適用新快樂旅綜+ 兒童方案；依 DM「針對未滿15足歲之被保險人，本保險契約無提供意外死亡之喪葬費用保險金」。');
     }
     if (anyLife) {
@@ -924,6 +941,7 @@
     detectSchengen: detectSchengen,
     detectDomestic: detectDomestic, DOMESTIC_WARNING: DOMESTIC_WARNING,
     AGE_BANDS: AGE_BANDS, ageInfo: ageInfo, isChildQuote: isChildQuote, childOh1Wan: childOh1Wan,
+    lifeRegionOf: lifeRegionOf, effectiveOaa: effectiveOaa,
     CHILD_MRC_WAN: CHILD_MRC_WAN, CHILD_OH1_OPTIONS: CHILD_OH1_OPTIONS, propertyAgeCheck: propertyAgeCheck,
     isCardQuote: isCardQuote, renderNotes: renderNotes, displayTagline: displayTagline, schengenBadge: schengenBadge, cardPresets: cardPresets, cardPresetByCombo: cardPresetByCombo, cardDefaultCombo: cardDefaultCombo,
     cardAddonQuote: cardAddonQuote, CARD_SOURCE: CARD_SOURCE,
