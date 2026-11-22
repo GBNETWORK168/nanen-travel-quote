@@ -142,9 +142,9 @@
         else if (!p.property.planCode) p.property.planCode = L.code[idx];
       }
     });
-    q.agent = q.agent || { unit: '南恩通訊處', name: '陳銘旭', title: '業務經理' };
-    // 簽名不再列處經理（舊稿／舊連結一併移除）
-    delete q.agent.manager; delete q.agent.managerTitle;
+    q.agent = q.agent || { name: '陳銘旭', title: '業務經理' };
+    // 簽名不再列單位／處經理（舊稿／舊連結一併移除）
+    delete q.agent.unit; delete q.agent.manager; delete q.agent.managerTitle;
     var domesticDest = !!TQ.detectDomestic(q.destination);
     if (!q.lifeRegionPct) q.lifeRegionPct = domesticDest ? 100 : TQ.guessRegionPct(q.destination);
     if (!q.dateFormat) q.dateFormat = 'roc';
@@ -240,7 +240,6 @@
   }
 
   /* ---------- 業務員姓名（使用紀錄用；不寫入報價資料、不顯示在報價圖／客戶頁） ---------- */
-  var USER_UNIT = '南恩通訊處'; // 單位：固定，不可修改
   var USER_FIELDS = [{ id: 'userName', key: 'tq-user-name', label: '業務員姓名' }, { id: 'userTitle', key: 'tq-user-title', label: '職稱' }];
   function userVal(id) {
     var el = document.getElementById(id);
@@ -288,7 +287,7 @@
       if (!window.TQ_LOG || !TQ_LOG.enabled) return;
       var ai = TQ.ageInfo(q.age);
       TQ_LOG.logDownload({
-        unit: USER_UNIT, name: getUserName(), title: getUserTitle(), destination: q.destination || '', days: q.days || '',
+        name: getUserName(), title: getUserTitle(), destination: q.destination || '', days: q.days || '',
         startDate: q.startDate || '', endDate: q.endDate || '', downloadType: type || '總圖',
         age: ai.valid ? ai.age : '', ageBand: ai.valid ? ai.label : '',
         plans: (q.plans || []).map(function (p, i) {
@@ -1270,5 +1269,5 @@
   if (!initial) initial = readStoredDraft();
   load(initial || window.SAMPLE_QUOTE);
   // 開啟紀錄（未設定 USAGE_LOG_URL 時自動略過）
-  try { if (window.TQ_LOG) TQ_LOG.logOpen('editor', { unit: USER_UNIT, name: getUserName(), title: getUserTitle() }); } catch (e) {}
+  try { if (window.TQ_LOG) TQ_LOG.logOpen('editor', { name: getUserName(), title: getUserTitle() }); } catch (e) {}
 })();

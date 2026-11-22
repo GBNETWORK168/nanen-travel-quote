@@ -77,7 +77,6 @@
       h += '<section class="sum-notes">' + TQ.renderNotes(q1) + '</section>';
     }
     h += '<footer class="sum-foot">';
-    h += '<div class="u">富邦人壽 ' + TQ.esc(a.unit || '南恩通訊處') + '</div>';
     h += '<div class="p">' + TQ.esc(a.title || '業務經理') + ' <b>' + TQ.esc(a.name || '陳銘旭') + '</b></div>';
     if (TQ.isCardQuote && TQ.isCardQuote(quote)) {
       var cardParts = [];
@@ -118,12 +117,12 @@
     var host = ensureHost();
     host.innerHTML = buildSummaryHtml(quote, opts);
     var el = host.querySelector('#summaryCapture');
-    // 等 logo（及所有圖片）載入完成再截圖，避免第一次下載 logo 空白
+    // 等所有圖片載入完成再截圖
     var imgs = Array.prototype.slice.call(el.querySelectorAll('img'));
-    var ready = Promise.all([TQ.brandLogoReady ? TQ.brandLogoReady() : Promise.resolve()].concat(imgs.map(function (img) {
+    var ready = Promise.all(imgs.map(function (img) {
       if (img.complete && img.naturalWidth) return img.decode ? img.decode().catch(function () {}) : Promise.resolve();
       return new Promise(function (res) { img.onload = img.onerror = function () { res(); }; });
-    })));
+    }));
     return ready.then(function () { return global.html2canvas(el, {
       scale: 2,
       backgroundColor: '#f4f6f9',

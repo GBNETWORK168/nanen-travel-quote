@@ -167,8 +167,7 @@ input::placeholder { color: #8b97a5; }
   margin: 8px 14px 16px; padding: 14px; border-radius: 14px; text-align: center;
   background: #00509E; color: #fff; border-top: 3px solid #c9a45c;
 }
-.sum-foot .u { color: #e6cf9a; font-size: 13px; letter-spacing: .12em; font-weight: 600; }
-.sum-foot .p { margin-top: 4px; font-size: 16px; }
+.sum-foot .p { font-size: 16px; }
 .sum-foot .p b { font-size: 18px; letter-spacing: .06em; }
 .sum-foot .note { margin-top: 6px; font-size: 11px; color: #9ab; }
 
@@ -217,9 +216,8 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 .days-auto-val:empty::before { content: '—'; color: #9aa7b6; font-weight: 400; }
 @media (max-width: 560px) { .date-row { grid-template-columns: 1fr 1fr; } .days-auto { grid-column: 1 / -1; min-height: 0; } }
 
-/* 頁首兩行：標語＋系統名稱 */
-.ed-brand { display: flex; flex-direction: row; align-items: center; gap: 10px; line-height: 1.3; }
-.ed-logo { display: block; width: 44px; height: auto; object-fit: contain; flex: none; }
+/* 頁首：系統名稱 */
+.ed-brand { display: flex; flex-direction: row; align-items: center; line-height: 1.3; }
 .ed-brand-text { display: flex; flex-direction: column; }
 .ed-slogan { display: block; font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #fff; opacity: .92; }
 .ed-title { display: block; }
@@ -231,10 +229,9 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
   .ed-title .ed-internal { margin: 3px 0 0; }
 }
 
-/* 總表圖品牌列（同編輯器頁首，不含內部使用標記） */
+/* 總表圖品牌列（系統名稱，不含內部使用標記） */
 .sum-brand-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(230, 207, 154, .3); }
 .sum-hero { position: relative; }
-.sum-brand-logo { position: absolute; top: 24px; right: 24px; width: 160px; height: 160px; object-fit: contain; z-index: 1; }
 .sum-brand-text { display: flex; flex-direction: column; line-height: 1.35; }
 .sum-brand-slogan { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #fff; }
 .sum-brand-title { font-size: 19px; font-weight: 800; color: #e6cf9a; letter-spacing: .02em; }
@@ -242,13 +239,10 @@ input.is-domestic { border-color: #c62828 !important; box-shadow: 0 0 0 2px rgba
 /* 業務員姓名（使用紀錄） */
 .ed-user { padding: 12px 16px; border-left: 4px solid var(--gold); }
 .ed-user label { font-weight: 700; color: var(--navy); }
-.ed-user-row { display: grid; grid-template-columns: auto 1fr 1fr; gap: 10px 14px; align-items: end; }
+.ed-user-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; align-items: end; }
 .ed-user-row .dest-warn { grid-column: 1 / -1; margin-top: 0; }
 .ed-user-row input { max-width: none; width: 100%; }
-.ed-unit { display: flex; flex-direction: column; gap: 4px; }
-.ed-unit-lbl { font-size: 13px; color: var(--muted); }
-.ed-unit-val { display: inline-block; padding: 9px 12px; border-radius: 8px; background: #f1f4f8; border: 1px dashed var(--line); color: var(--navy); font-weight: 700; white-space: nowrap; }
-@media (max-width: 560px) { .ed-user-row { grid-template-columns: 1fr 1fr; } .ed-unit { grid-column: 1 / -1; flex-direction: row; align-items: center; } }
+@media (max-width: 560px) { .ed-user-row { grid-template-columns: 1fr; } }
 .time-sel { display: flex; align-items: center; gap: 4px; }
 .time-sel select { width: auto; min-width: 64px; }
 #checks, .checks { display: none !important; }

@@ -321,7 +321,6 @@ window.SAMPLE_QUOTE = {
     }
   ],
   "agent": {
-    "unit": "南恩通訊處",
     "name": "陳銘旭",
     "title": "業務經理"
   }

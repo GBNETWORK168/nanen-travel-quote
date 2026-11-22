@@ -129,8 +129,7 @@ body {
   margin: 14px 14px 24px; padding: 18px 16px; border-radius: var(--radius); text-align: center;
   background: var(--navy); color: #fff; border-top: 3px solid var(--gold);
 }
-.sig-unit { color: var(--gold-2); font-size: 15px; letter-spacing: .15em; font-weight: 600; }
-.sig-people { margin-top: 4px; font-size: 19px; display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 8px; }
+.sig-people { font-size: 19px; display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 8px; }
 .sig-people b { font-size: 21px; letter-spacing: .08em; }
 .sig-people .sep { color: var(--gold); }
 
@@ -165,9 +164,8 @@ body {
 /* 未滿15足歲：主框顯示兒童主約 MRC */
 .death-box.child .death-val { font-size: 30px; }
 
-/* 品牌列（客戶頁頁首）：大心 logo＋標語＋系統名稱 */
+/* 品牌列（客戶頁頁首）：系統名稱 */
 .brand-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(230, 207, 154, .28); }
-.brand-logo { position: absolute; top: 24px; right: 24px; width: 160px; height: 160px; object-fit: contain; z-index: 1; }
 .brand-text { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
 .brand-slogan { font-size: 13px; font-weight: 700; letter-spacing: .08em; color: #fff; opacity: .92; }
 .brand-title { font-size: 18px; font-weight: 800; color: var(--gold-2); letter-spacing: .02em; }
