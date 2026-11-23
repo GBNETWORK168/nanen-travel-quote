@@ -4,7 +4,7 @@
  * 帳號清單由 /workspace/site-auth/manage_users.py 自動產生，請勿手改 USERS 這一行。 */
 (function(){
 'use strict';
-var USERS=/*USERS_BEGIN*/{"A":{"s":"e5483ccc2e42dd498fc42cf0","h":"621fd7e0665f9acd8c68d37a6d2fe4b6391812a1a6f36745c60bd77cfd0d1d29"},"B":{"s":"7a05c54c3d201da5ebcdf1dd","h":"cf6ba20b577558f120e4bd578b8486a6a616599af54d5d65a25bf678530cfa0b"},"C":{"s":"523a21c859abf2be1df7d6fc","h":"f04450daf40c7a664bf451550f464936b994b882b9ca81fec8e3c757379214d1"},"D":{"s":"d5c7ce1203ded2029abe98ef","h":"ebbca270f031755272211dc8f5f552bfd8053d29f0dba5eb1a4ed5fb2be20d10"}}/*USERS_END*/;
+var USERS=/*USERS_BEGIN*/{"fb95db20134269fc3835":{"s":"76d3869f239de0556abeb9cb","h":"a2a937c0aad9a66ff0a57090a8bb0b2b8fe9885856cc5acd9d4eae52d376078f"},"c456f933bafdc1e32e99":{"s":"52396af7fb25c4fff60d8d4e","h":"d1ae3b6addf7067752828247a8f5a086689233fadc76ad0f163ad7b3f6f732c4"},"8d1e1b560dc498add532":{"s":"80b253f3af1b6ec50c7a9343","h":"d9f8280a183900cc9b2fd4949b4a62bbf6d9dfa20f269a871482da078b681365"},"fa3ba7aa603af11f2d03":{"s":"d39cd770f2b3158b3895927f","h":"1f1986be94cbcad4dfebe0c8f03837431ebf13065b42ca7a9b1b048199cdfefe"},"bba224c80330a73a80ff":{"s":"27fd04a3d900d6f1cdc8f2e5","h":"edcac34b34839233927a53160b8772774c722b0baa325a1e349b4edbde880c4c"},"2f9fe067320d3cefa5c9":{"s":"59f5011cff049f2073fedce3","h":"b88a20cf1b8e7f3bb6603a1b8c7e8f54b51141ee2838a3895ffc326d58c451ee"},"1d3e4cd6b8620df6d3fe":{"s":"8208134e32c4f1af63b9a102","h":"312f3a23e8aa7d5080f4b35ced4f120fb60f52a80f305154abe480140cca9202"},"525a35d5de445c417472":{"s":"18ac61c2de94627dfa0b4756","h":"e7eba3a179e198b4f10f22cc003de8e87222f4323d14dd2badf79d85c778d9cb"},"1fda383666d347935e94":{"s":"0173c8fe50b1ad4ac4b5892b","h":"2633a57337b5b25ca5005c29fa8f423a52ca23b3dc9da651d3a1140abb876d73"},"0d19fb4b75d3fb391060":{"s":"a26f1ab5c27e2314284a9c07","h":"ff8f70a4408cecb1e485e9c643107d33f7ac49b543e210ddaf860c5f066c806b"},"2e773f74476a943761fd":{"s":"2d93c83a64e71ad0308f0185","h":"2ed5aa924ba5fa9b34ecfb0621f838108b6db522513bb8dc51aca5ce778cb527"},"d5d94565a06cfa4f674d":{"s":"00a3464104187bea122026fa","h":"29101d0268c44ef8b3877d5e8be0314dd29e8655440d5284dbb8c7e010b60fe4"},"9cff845284ae3350faeb":{"s":"d0f9b841d17f32c858bb84a8","h":"485fe39b37111f7b88cabadcbd31e488c6b2051fc72bbd3a8df056f0af7c8792"},"ea61b25912ebb6eaf563":{"s":"48d7e91d800985ea3a38583e","h":"04f7812417dde9df2a337e5ec89c7651b8b3174ff9c3d4dc6bf97a39b30ced68"},"e69c19432e9dda7a735e":{"s":"562854ae3ca20cd22c7296a4","h":"72d42060da24a912c2955cc97d9f9db7c018e3c6b6a0b005081480b72ad21218"},"8c99a4886921ec3f9304":{"s":"f6a05fe48f836d9fd68227bd","h":"0452788d1b1f07bb24da2b17976bea5eefb48e687b900895fae21aff87c9eda1"},"52a530d70044b511a01a":{"s":"6a428867603d5b30aa32944d","h":"daaf3813d39f0bee5574cd88b27e89c14c6d7994f466bce494a09efe794dbcc6"},"ba679eb9cbf476e8e43a":{"s":"9be8eb76ac90e56986b517f5","h":"a9107f8551599c43ff283a9ad02765c8ec563fc9cc73e0c65506bc87d918872c"},"7c6de942141244cd9616":{"s":"427996f30065371c5fda0103","h":"24409845202ec7ae2d36efe27a46e47725d8356b591b04c754bac6171e898148"},"318d758b4865749b66e9":{"s":"42c20187e542db07a7fc86fd","h":"2bae515ddde8df565176929240ad1fac8ebc19660b1e733931148f8f106335b3"},"68e04a2b5ad70f021a24":{"s":"60faa1b642bb75a5bc75bda9","h":"bf76f5fad1c70ec6a40a4ea3f87815741791a88f87002b6054f16ae2addcd1a3"},"c5196ae2da1080f02571":{"s":"96e1c42806ac6a28551108a7","h":"6de9b4da6d583b8a1675f42b26332bc54beb027a22df150cfba1dc15792aec89"},"f62f41a642ab6e56e0c0":{"s":"2175dd9c559b4113f15d31fe","h":"1d4afd4c9a9197ce0c6c6c0fba45297ed43ab97b46bedb3eaf092c8311c20718"},"bd2af26797c28f492b1d":{"s":"4e4dd27a3b365f71041152b8","h":"154eb262614b99af691b429e019fa7de1e78a4229d66cef7b29ce1e109d992a6"},"eb003b80718dd7859760":{"s":"e75be06e60390b42a078973d","h":"4dc30e07ae61d7a976b5d24f4efe21c8695b01cc21db53201a7fd87a7f9985e2"},"dce9230bcdeb887a33d0":{"s":"1454941a73c6372952c4b4ae","h":"83afd42363b5d1adfe9ff539fc34727bf16cac11d0fba7e44ab843dcf172e3b7"},"5608ca3f3f94d6746d5f":{"s":"8f1dfe3725b992c4cbabd05a","h":"4668376761c6a3209cebe096a8f003f39b75e71d524d20bfaa84c5032483f890"},"9d1e5e320a6582a68204":{"s":"9bdac039778417fbb5d03f52","h":"ce2d7bc165aa6b4f7b84d82a1b690591b7a16ef5f159cd17ec7477c6886c83c8"},"5023de6b5c2c0f91c297":{"s":"504408636d4e29f3d1277c84","h":"507eae5152ea4a0346a10791916a5c2f06f0bff459248519e74cee0ac432860f"},"02fd4cf6875d7124e357":{"s":"ca69ed5f0506432ecc5c9913","h":"ce92f7a0e4ff8399d441d6b9e398d0aecc5b2a14a3c0779a4f6056a47f77172d"},"6efb39367517900ac344":{"s":"406431f415ee51437bb7ac47","h":"af5af1a00594749274c72a4591ce736c689a4e7a15abfe9e4b44ba4766bb564a"},"39f7ae5d22b52718664a":{"s":"8ce1cde4cc7ac5cd7c830bf8","h":"7e3bd0230916158fb55074cd4309e25e152f186ea56846f0c231d13941603bbb"},"8931704d262a140d85e8":{"s":"232117e0a9377bcbd6948681","h":"6bb8fa082da621ed537a588531f17f0d8a99cefa9bd666aed8ea11432ab318b3"},"5aed4b6be428fbfa91eb":{"s":"90e514de3a02b1a88ad81614","h":"6540d9708adc08af9452b0b73fad029442808ed663043c186854c25ad30f881a"},"501887882f16071a49f4":{"s":"c2332139f6a81da51e7373af","h":"4577331ce7063c2bd09ef132c2c63ee62dbb4c05db85411fdad3657339998abd"},"6690735dfbdc9f5f98af":{"s":"04b84cceaa6a9d8cbedbe9fb","h":"6ea5f483e6c62490c27339d8ff6545073f96f036d10d022bb5b72f71a97c1952"},"80312a9a2c918f20ee83":{"s":"ff3a0cd2eb19badbe3cec566","h":"03fd3fe651bc5ad1749e00ac29f5c0b50ff632b1334b53c86cf750b468e8fb79"},"e88e245b94232bde1515":{"s":"9dbf84521eb5d1ebb208e284","h":"496786465ac343d826a0455eff5b7cc5028867ccc8375c9bac423d207b101f23"},"1531322fab4334c04fd2":{"s":"d9e0ff0488ad06b62a65fb37","h":"913c66fb00d5c78f98403db315f1b5fcf77c7bb32a0fbeddd6bf9a9b76aa271a"},"841f0d1d748732c838bc":{"s":"6e2a5bca3ed14f8978e62583","h":"4cba9c8d26636469e1cc33d7780d8a3c79f162c6e9036f8fcf24d6773902db1e"},"f72ce54ec99e5a51b028":{"s":"41ddc253963b220e8261189a","h":"2a0289422778dbd31de54dd7309c5ec1b2cc5776e20083d2034881df10cd1ada"},"bc2c6e878cb2421c38fe":{"s":"0d5a14b617f693f773a0af55","h":"601ce8cbc482e9882d30f2351adfe3d86cbae54d2ba5c5c7e83949b8b0c275ef"},"08738b454a9775fd06b3":{"s":"c9d36c3bb2dd26b22df776a1","h":"99d3193f070baf5f8eae386d0b69d519d39b8f6b577ae6b331b61fb68ba9b17a"},"18de2ebfe4a48bf74c8d":{"s":"49484bdff61ed227d4575ca6","h":"6d36c6c6dccb2cceecd9f44da5e79a6744973fc83c1b2c25bb7eb27a2111acb2"}}/*USERS_END*/;
 var ITER=20000,DAYS=30,KEY='gb_auth_v2';
 var d=document,cs=d.currentScript;
 /* ---- SHA-256（同步、無相依） ---- */
@@ -27,16 +27,29 @@ function sha256(str){
   }
   var o='';for(i=0;i<8;i++)o+=('00000000'+(H[i]>>>0).toString(16)).slice(-8);return o;
 }
-function norm(u){return String(u==null?'':u).trim().toUpperCase()}
+function norm(u){u=String(u==null?'':u).replace(/\s+/g,'').toLowerCase();var i=u.indexOf('@');return i>0?u.slice(0,i):u}
+function ukey(n){return sha256('u|'+n).slice(0,20)}
 function derive(u,pw,salt){var h=sha256(u+'|'+pw+'|'+salt);for(var i=0;i<ITER;i++)h=sha256(h+salt);return h}
 function tok(h){return sha256('sess|'+h)}
 function read(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}}
-function authed(){var o=read(),r=o&&USERS.hasOwnProperty(o.u)&&USERS[o.u];return !!(r&&o.t===tok(r.h)&&o.exp>Date.now())}
-function login(user,pw){var n=norm(user),r=USERS.hasOwnProperty(n)&&USERS[n];if(!r||!pw||derive(n,pw,r.s)!==r.h)return false;
-  try{localStorage.setItem(KEY,JSON.stringify({u:n,t:tok(r.h),exp:Date.now()+DAYS*864e5}))}catch(e){return false}return true}
-function current(){var o=read();return authed()&&o.u!=='~'?o.u:''}
+function authed(){var o=read(),r=o&&USERS.hasOwnProperty(o.k)&&USERS[o.k];return !!(r&&o.t===tok(r.h)&&o.exp>Date.now())}
+function login(user,pw){var n=norm(user),k=ukey(n),r=USERS.hasOwnProperty(k)&&USERS[k];if(!r||!pw||derive(n,pw,r.s)!==r.h)return false;
+  try{localStorage.setItem(KEY,JSON.stringify({k:k,u:n,t:tok(r.h),exp:Date.now()+DAYS*864e5}))}catch(e){return false}return true}
+function current(){var o=read();return authed()&&o.u!=='~'?(o.u||''):''}
+/* ---- 登入使用紀錄（LOG_URL 空白就不送；送失敗不影響登入；絕不送密碼） ---- */
+var LOG_URL=/*LOG_URL_BEGIN*/""/*LOG_URL_END*/,SITE=/*SITE_BEGIN*/"旅平險"/*SITE_END*/;
+function logEvent(ev,user){
+  if(!LOG_URL)return;
+  try{
+    var body=JSON.stringify({ev:ev,user:String(user||'').replace(/\s+/g,'').toLowerCase().slice(0,80),site:SITE,page:location.pathname,ua:navigator.userAgent.slice(0,300),ts:Date.now()});
+    if(navigator.sendBeacon&&navigator.sendBeacon(LOG_URL,new Blob([body],{type:'text/plain;charset=UTF-8'})))return;
+    fetch(LOG_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain;charset=UTF-8'},body:body}).catch(function(){});
+  }catch(e){}
+}
+function dailyVisit(){try{var o=read();if(!o)return;var day=new Date(Date.now()+8*3600e3).toISOString().slice(0,10),k='gb_visit_'+SITE+'_'+location.pathname;
+  if(localStorage.getItem(k)===day)return;localStorage.setItem(k,day);logEvent('visit',o.u==='~'?'(舊共用帳號)':o.u)}catch(e){}}
 /* 舊的單一共用帳號（本站原內建登入，格式 SHA-256(帳號:密碼)）：保留可用，之後不需要時由管理端移除 */
-var LP=/*LP_BEGIN*/[]/*LP_END*/;
+var LP=/*LP_BEGIN*/["e3467ad11993520bc0b7fa9418d6d45e5d4baca97aad29f5743e914867d54351"]/*LP_END*/;
 function lpTok(h){return sha256('lp|'+h)}
 var userAuthed=authed;authed=function(){if(userAuthed())return true;var o=read();if(!(o&&o.u==='~'&&o.exp>Date.now()))return false;for(var i=0;i<LP.length;i++)if(o.t===lpTok(LP[i]))return true;return false};
 var userLogin=login;login=function(user,pw){if(userLogin(user,pw))return true;if(!LP.length||!pw)return false;var h=sha256(String(user).trim()+':'+pw);if(LP.indexOf(h)<0)return false;
@@ -89,7 +102,8 @@ function showGate(){
     if(!p.value){err.textContent='請輸入密碼';p.focus();return}
     btn.disabled=true;
     setTimeout(function(){
-      if(login(u.value,p.value)){location.reload();return}
+      if(login(u.value,p.value)){logEvent('login_ok',read().u==='~'?'(舊共用帳號)':read().u);setTimeout(function(){location.reload()},150);return}
+      logEvent('login_fail',u.value);
       btn.disabled=false;fails++;p.value='';p.focus();
       if(fails>=5){until=Date.now()+30000;fails=0;err.textContent='帳號或密碼錯誤，已暫時鎖定 30 秒'}else err.textContent='帳號或密碼錯誤，請重新輸入';
     },30);
@@ -101,7 +115,7 @@ function addLogout(){
   var b=d.createElement('button');b.type='button';b.className='ga-logout';b.textContent='登出';b.title='登出 '+current();
   b.addEventListener('click',function(){if(confirm('確定要登出嗎？'))logout()});d.body.appendChild(b);
 }
-if(!authed())lock();else onBody(addLogout);
+if(!authed())lock();else{onBody(addLogout);dailyVisit()}
 window.addEventListener('pageshow',function(){if(!authed())lock()});
 window.addEventListener('storage',function(e){if(e.key===KEY&&!authed())lock()});
 })();
