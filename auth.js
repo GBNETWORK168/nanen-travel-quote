@@ -37,10 +37,13 @@ function login(user,pw){var n=norm(user),k=ukey(n),r=USERS.hasOwnProperty(k)&&US
   try{localStorage.setItem(KEY,JSON.stringify({k:k,u:n,t:tok(r.h),exp:Date.now()+DAYS*864e5}))}catch(e){return false}return true}
 function current(){var o=read();return authed()&&o.u!=='~'?(o.u||''):''}
 /* ---- 登入使用紀錄（LOG_URL 空白就不送；送失敗不影響登入；絕不送密碼） ---- */
-var LOG_URL=/*LOG_URL_BEGIN*/""/*LOG_URL_END*/,SITE=/*SITE_BEGIN*/"旅平險"/*SITE_END*/;
+var LOG_URL=/*LOG_URL_BEGIN*/"https://script.google.com/macros/s/AKfycbyS3wmjnpBV_WyivQ_Uu8DNQeJeIQJVk6iX_F92sVq6OJVSBnopqoKBFhYg2c1x5HGH/exec"/*LOG_URL_END*/,SITE=/*SITE_BEGIN*/"旅平險"/*SITE_END*/;
+function failUser(u){var t=String(u||'').replace(/\s+/g,'').toLowerCase();
+  if(/^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(t))return t;
+  if(t&&USERS.hasOwnProperty(ukey(norm(t))))return t;return '(非帳號格式)'}
 function logEvent(ev,user){
   if(!LOG_URL)return;
-  try{
+  try{if(ev==='login_fail')user=failUser(user);
     var body=JSON.stringify({ev:ev,user:String(user||'').replace(/\s+/g,'').toLowerCase().slice(0,80),site:SITE,page:location.pathname,ua:navigator.userAgent.slice(0,300),ts:Date.now()});
     if(navigator.sendBeacon&&navigator.sendBeacon(LOG_URL,new Blob([body],{type:'text/plain;charset=UTF-8'})))return;
     fetch(LOG_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain;charset=UTF-8'},body:body}).catch(function(){});
